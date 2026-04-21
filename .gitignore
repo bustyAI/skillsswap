@@ -1,0 +1,15 @@
+# ---- Claude Code local files ----
+# Your personal project briefing — not shared via git
+CLAUDE.md
+
+# Claude Code's local state, plugin installs, and session data
+.claude/
+.claude-plugin/
+
+# Local MCP server configs if they contain secrets
+.mcp.json
+
+# Claude Code session logs if enabled
+.claude-sessions/
+
+docs/
