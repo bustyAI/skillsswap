@@ -1,3 +1,8 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+
 # ---- Claude Code local files ----
 # Your personal project briefing — not shared via git
 CLAUDE.md
