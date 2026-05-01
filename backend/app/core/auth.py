@@ -48,7 +48,7 @@ async def get_current_user(
     token = credentials.credentials
     settings = get_settings()
 
-    # First, decode the header without verification to get the key ID
+    # First, decode the header to get key ID
     try:
         unverified_header = jwt.get_unverified_header(token)
     except JWTError as e:
@@ -81,6 +81,7 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Could not fetch signing keys: {e}",
             headers={"WWW-Authenticate": "Bearer"},
+
         ) from e
 
     # Verify the token signature and claims
