@@ -18,3 +18,5 @@ CLAUDE.md
 .claude-sessions/
 
 docs/
+
+backend/uv.lock

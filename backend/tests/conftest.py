@@ -2,8 +2,9 @@
 
 import base64
 import time
+from collections.abc import Callable, Generator
 from typing import Any
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from cryptography.hazmat.primitives import serialization
@@ -88,7 +89,7 @@ def make_token(
     private_key_pem: bytes,
     test_kid: str,
     test_settings: Settings,
-):
+) -> Callable[..., str]:
     """Factory fixture to create signed JWTs with customizable claims."""
 
     def _make_token(
@@ -117,18 +118,21 @@ def make_token(
 
         headers = {"kid": kid if kid is not None else test_kid}
 
-        return jwt.encode(
+        token: str = jwt.encode(
             claims,
             private_key_pem,
             algorithm="RS256",
             headers=headers,
         )
+        return token
 
     return _make_token
 
 
 @pytest.fixture
-def mock_jwks_cache(mock_jwk: dict[str, Any], test_kid: str):
+def mock_jwks_cache(
+    mock_jwk: dict[str, Any], test_kid: str
+) -> Generator[MagicMock, None, None]:
     """Patch jwks_cache.get_key to return our test JWK."""
 
     async def mock_get_key(kid: str) -> dict[str, Any]:
@@ -142,14 +146,16 @@ def mock_jwks_cache(mock_jwk: dict[str, Any], test_kid: str):
 
 
 @pytest.fixture
-def mock_settings_dep(test_settings: Settings):
+def mock_settings_dep(test_settings: Settings) -> Generator[Settings, None, None]:
     """Patch get_settings to return test configuration."""
-    with patch("app.core.auth.get_settings", return_value=test_settings):
-        with patch("app.core.security.get_settings", return_value=test_settings):
-            yield test_settings
+    with (
+        patch("app.core.auth.get_settings", return_value=test_settings),
+        patch("app.core.security.get_settings", return_value=test_settings),
+    ):
+        yield test_settings
 
 
 @pytest.fixture
-def client(mock_jwks_cache: Any, mock_settings_dep: Settings) -> TestClient:
+def client(mock_jwks_cache: MagicMock, mock_settings_dep: Settings) -> TestClient:
     """Test client with mocked auth dependencies."""
     return TestClient(app)
