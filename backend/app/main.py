@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI
 
 from app.api.health import router as health_router
 from app.api.me import router as me_router
@@ -9,5 +9,9 @@ app = FastAPI(
     version="0.1.0",
 )
 
-app.include_router(health_router)
-app.include_router(me_router)
+# Parent router for all API routes - add new routers here
+api_router = APIRouter(prefix="/api")
+api_router.include_router(health_router)
+api_router.include_router(me_router)
+
+app.include_router(api_router)
