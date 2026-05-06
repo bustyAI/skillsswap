@@ -15,6 +15,7 @@ dependencies = [
     "python-jose[cryptography]>=3.3.0",
     "httpx>=0.28.0",
     "redis>=5.2.0",
+    "pgvector>=0.3.0",
 ]
 
 [project.optional-dependencies]
@@ -67,6 +68,10 @@ plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
 module = "jose.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "pgvector.*"
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

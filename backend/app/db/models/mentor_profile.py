@@ -22,6 +22,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
 if TYPE_CHECKING:
+    from app.db.models.mentor_embedding import MentorEmbedding
+    from app.db.models.mentor_topic import MentorTopic
     from app.db.models.user import User
 
 
@@ -96,6 +98,19 @@ class MentorProfile(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     user: Mapped[User] = relationship(
         "User",
         back_populates="mentor_profile",
+    )
+
+    # Relationship to MentorTopic join table
+    mentor_topics: Mapped[list[MentorTopic]] = relationship(
+        "MentorTopic",
+        back_populates="mentor_profile",
+    )
+
+    # One-to-one relationship to embedding
+    embedding: Mapped[MentorEmbedding | None] = relationship(
+        "MentorEmbedding",
+        back_populates="mentor_profile",
+        uselist=False,
     )
 
     def __repr__(self) -> str:
