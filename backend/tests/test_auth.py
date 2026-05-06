@@ -1,4 +1,4 @@
-"""Tests for JWT validation and the /me endpoint."""
+"""Tests for JWT validation and the /api/me endpoint."""
 
 from collections.abc import Callable
 
@@ -17,7 +17,7 @@ class TestValidToken:
         token = make_token(sub="user-uuid-12345")
 
         response = client.get(
-            "/me",
+            "/api/me",
             headers={"Authorization": f"Bearer {token}"},
         )
 
@@ -37,7 +37,7 @@ class TestValidToken:
         token = make_token()
 
         response = client.get(
-            "/me",
+            "/api/me",
             headers={"Authorization": f"Bearer {token}"},
         )
 
@@ -59,7 +59,7 @@ class TestExpiredToken:
         token = make_token(exp_offset=-3600)
 
         response = client.get(
-            "/me",
+            "/api/me",
             headers={"Authorization": f"Bearer {token}"},
         )
 
@@ -76,7 +76,7 @@ class TestMalformedToken:
     ) -> None:
         """A completely invalid token string should be rejected."""
         response = client.get(
-            "/me",
+            "/api/me",
             headers={"Authorization": "Bearer not-a-valid-jwt"},
         )
 
@@ -92,7 +92,7 @@ class TestMalformedToken:
         truncated = token[:50]  # Cut off most of the token
 
         response = client.get(
-            "/me",
+            "/api/me",
             headers={"Authorization": f"Bearer {truncated}"},
         )
 
@@ -112,7 +112,7 @@ class TestMalformedToken:
         )
 
         response = client.get(
-            "/me",
+            "/api/me",
             headers={"Authorization": f"Bearer {tampered}"},
         )
 
@@ -133,7 +133,7 @@ class TestWrongIssuer:
         )
 
         response = client.get(
-            "/me",
+            "/api/me",
             headers={"Authorization": f"Bearer {token}"},
         )
 
@@ -153,7 +153,7 @@ class TestWrongClientId:
         token = make_token(client_id="wrong-client-id-xyz")
 
         response = client.get(
-            "/me",
+            "/api/me",
             headers={"Authorization": f"Bearer {token}"},
         )
 
@@ -173,7 +173,7 @@ class TestWrongTokenUse:
         token = make_token(token_use="id")
 
         response = client.get(
-            "/me",
+            "/api/me",
             headers={"Authorization": f"Bearer {token}"},
         )
 
@@ -224,7 +224,7 @@ class TestMissingKid:
         token = jwt.encode(claims, "secret", algorithm="HS256")
 
         response = client.get(
-            "/me",
+            "/api/me",
             headers={"Authorization": f"Bearer {token}"},
         )
 
@@ -244,7 +244,7 @@ class TestUnknownKid:
         token = make_token(kid="unknown-key-id-99999")
 
         response = client.get(
-            "/me",
+            "/api/me",
             headers={"Authorization": f"Bearer {token}"},
         )
 
@@ -260,7 +260,7 @@ class TestMissingAuth:
         client: TestClient,
     ) -> None:
         """A request without Authorization header should return 401."""
-        response = client.get("/me")
+        response = client.get("/api/me")
 
         assert response.status_code == 401
 
@@ -270,7 +270,7 @@ class TestMissingAuth:
     ) -> None:
         """An empty Bearer token should return 401."""
         response = client.get(
-            "/me",
+            "/api/me",
             headers={"Authorization": "Bearer "},
         )
 
@@ -285,7 +285,7 @@ class TestHealthEndpoint:
         client: TestClient,
     ) -> None:
         """The health endpoint should work without authentication."""
-        response = client.get("/health")
+        response = client.get("/api/health")
 
         assert response.status_code == 200
         assert response.json() == {"status": "ok"}

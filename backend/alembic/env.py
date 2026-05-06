@@ -11,6 +11,10 @@ from alembic import context
 from app.core.config import get_settings
 from app.db.base import Base
 
+# Import all models so their tables are registered with Base.metadata
+# This is required for Alembic autogenerate to detect model changes
+from app.db.models import MentorProfile, User  # noqa: F401
+
 # Alembic Config object for access to .ini values
 config = context.config
 
