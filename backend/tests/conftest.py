@@ -1,8 +1,13 @@
-"""Shared test fixtures for authentication tests."""
+"""Shared test fixtures for SkillSwap tests.
+
+This module provides fixtures for:
+- Authentication testing (mocked JWKS, JWT generation)
+- Database testing (async sessions with transaction rollback)
+"""
 
 import base64
 import time
-from collections.abc import Callable, Generator
+from collections.abc import AsyncGenerator, Callable, Generator
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -11,9 +16,62 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi.testclient import TestClient
 from jose import jwt
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.core.config import Settings
+from app.core.config import Settings, get_settings
 from app.main import app
+
+# =============================================================================
+# DATABASE FIXTURES
+# =============================================================================
+
+
+@pytest.fixture
+async def async_session() -> AsyncGenerator[AsyncSession, None]:
+    """Provide an async session that rolls back after each test.
+
+    Each test runs in its own transaction that is rolled back at the end.
+    This provides test isolation without permanently modifying the database.
+
+    The pattern:
+    1. Create a fresh engine for this test
+    2. Begin a transaction on the connection
+    3. Create a session bound to that connection
+    4. Run the test
+    5. Rollback the transaction (undoing all changes)
+    6. Dispose of the engine
+    """
+    # Create engine for this test
+    engine = create_async_engine(
+        get_settings().database_url,
+        pool_pre_ping=True,
+        echo=False,
+    )
+
+    async with engine.connect() as connection:
+        # Begin a transaction that we'll rollback after the test
+        await connection.begin()
+
+        # Create a session bound to this connection
+        session_factory = async_sessionmaker(
+            bind=connection,
+            class_=AsyncSession,
+            expire_on_commit=False,
+        )
+
+        async with session_factory() as session:
+            yield session
+
+        # Rollback - undoes everything the test did
+        await connection.rollback()
+
+    # Clean up engine
+    await engine.dispose()
+
+
+# =============================================================================
+# AUTHENTICATION FIXTURES
+# =============================================================================
 
 
 @pytest.fixture
