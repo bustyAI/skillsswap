@@ -19,7 +19,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base, SoftDeleteMixin, TimestampMixin, UUIDPrimaryKeyMixin
 
 # TYPE_CHECKING is True only during type checking (mypy), not at runtime.
-# This avoids circular import issues while still getting type hints.
+# This avoids import issues while still getting type hints.
 if TYPE_CHECKING:
     from app.db.models.mentor_profile import MentorProfile
 

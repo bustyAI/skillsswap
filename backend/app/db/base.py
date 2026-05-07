@@ -5,7 +5,6 @@ This module provides the foundation for all database models:
 - SoftDeleteMixin: Mixin for models that support soft-delete
 - apply_soft_delete_filter: Helper to filter out soft-deleted rows
 
-Per architectural rule #3 from CLAUDE.md:
 "All queries filter deleted_at IS NULL by default."
 """
 
@@ -34,7 +33,7 @@ class TimestampMixin:
     """Mixin providing created_at and updated_at columns.
 
     The updated_at column is automatically set via a database trigger
-    (created in the base migration). Do not set it manually.
+    (created in the base migration).
     """
 
     created_at: Mapped[datetime] = mapped_column(
@@ -57,7 +56,6 @@ class SoftDeleteMixin:
     is set to the current timestamp. All queries should filter out rows
     where deleted_at IS NOT NULL using apply_soft_delete_filter().
 
-    Per architectural rule #2 from CLAUDE.md:
     "Soft-delete-with-cascade for users."
     """
 
@@ -72,7 +70,6 @@ class SoftDeleteMixin:
 class UUIDPrimaryKeyMixin:
     """Mixin providing a UUID primary key.
 
-    Per architectural rule #1 from CLAUDE.md:
     "UUIDs everywhere. Every primary key and foreign key is UUID v4."
 
     Uses PostgreSQL's gen_random_uuid() for server-side generation.
@@ -84,7 +81,9 @@ class UUIDPrimaryKeyMixin:
     )
 
 
-def apply_soft_delete_filter[T](stmt: Select[tuple[T]], model: Any) -> Select[tuple[T]]:
+def apply_soft_delete_filter(
+    stmt: Select[tuple[T]], model: Any
+) -> Select[tuple[T]]:
     """Apply soft-delete filter to a SELECT statement.
 
     Adds WHERE deleted_at IS NULL to exclude soft-deleted rows.
@@ -103,12 +102,12 @@ def apply_soft_delete_filter[T](stmt: Select[tuple[T]], model: Any) -> Select[tu
 
     Note:
         Admin-only queries that need to see deleted rows should NOT
-        call this function. This opt-in approach is per CLAUDE.md rule #3.
+        call this function.
     """
     return stmt.where(model.deleted_at.is_(None))
 
 
-def soft_delete_select[T](model: type[T]) -> Select[tuple[T]]:
+def soft_delete_select(model: type[T]) -> Select[tuple[T]]:
     """Create a SELECT statement with soft-delete filter pre-applied.
 
     Convenience function that combines select() with apply_soft_delete_filter().
