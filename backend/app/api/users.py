@@ -7,8 +7,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.core.auth import get_current_user
 from app.db.dependencies import DbSession
 from app.schemas.auth import TokenClaims
-from app.schemas.user import UserResponse
-from app.services.user_service import get_or_create_user
+from app.schemas.user import UserResponse, UserUpdate
+from app.services.user_service import get_or_create_user, update_user
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -36,3 +36,26 @@ async def get_current_user_profile(
     )
 
     return UserResponse.model_validate(user)
+
+
+@router.patch("/me", response_model=UserResponse)
+async def update_current_user_profile(
+    current_user: Annotated[TokenClaims, Depends(get_current_user)],
+    db: DbSession,
+    updates: UserUpdate,
+) -> UserResponse:
+    """Update the current user's profile fields."""
+    if not current_user.username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Token missing username claim",
+        )
+
+    user = await get_or_create_user(
+        db=db,
+        cognito_sub=current_user.sub,
+        email=current_user.username,
+    )
+
+    updated_user = await update_user(db=db, user=user, updates=updates)
+    return UserResponse.model_validate(updated_user)
