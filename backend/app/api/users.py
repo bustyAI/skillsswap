@@ -8,7 +8,7 @@ from app.core.auth import get_current_user
 from app.db.dependencies import DbSession
 from app.schemas.auth import TokenClaims
 from app.schemas.user import UserResponse, UserUpdate
-from app.services.user_service import get_or_create_user, update_user
+from app.services.user_service import get_or_create_user, soft_delete_user, update_user
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -59,3 +59,28 @@ async def update_current_user_profile(
 
     updated_user = await update_user(db=db, user=user, updates=updates)
     return UserResponse.model_validate(updated_user)
+
+
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_current_user(
+    current_user: Annotated[TokenClaims, Depends(get_current_user)],
+    db: DbSession,
+) -> None:
+    """Soft-delete the current user's account.
+
+    This sets deleted_at on the user and disables any mentor profile.
+    The user's Cognito account is NOT deleted (handle separately if needed).
+    """
+    if not current_user.username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Token missing username claim",
+        )
+
+    user = await get_or_create_user(
+        db=db,
+        cognito_sub=current_user.sub,
+        email=current_user.username,
+    )
+
+    await soft_delete_user(db=db, user=user)

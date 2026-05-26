@@ -1,10 +1,11 @@
 """User service - business logic for user operations."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.db.models.mentor_profile import MentorProfile
 from app.db.models.user import User
 from app.schemas.user import UserUpdate
 
@@ -66,6 +67,19 @@ async def soft_delete_user(
     db: AsyncSession,
     user: User,
 ) -> None:
-    """V1: Only sets deleted_at. Full cascade is deferred."""
-    user.deleted_at = datetime.now(timezone.utc)
+    """Soft-delete user with cascade.
+
+    V1 cascade behavior:
+    - Sets user.deleted_at
+    - Disables mentor_profile if it exists (is_enabled = False)
+    """
+    user.deleted_at = datetime.now(UTC)
+
+    result = await db.execute(
+        select(MentorProfile).where(MentorProfile.user_id == user.id)
+    )
+    mentor_profile = result.scalar_one_or_none()
+    if mentor_profile is not None:
+        mentor_profile.is_enabled = False
+
     await db.commit()
