@@ -2,6 +2,7 @@ from fastapi import APIRouter, FastAPI
 
 from app.api.health import router as health_router
 from app.api.me import router as me_router
+from app.api.mentors import router as mentors_router
 from app.api.users import router as users_router
 
 app = FastAPI(
@@ -14,6 +15,7 @@ app = FastAPI(
 api_router = APIRouter(prefix="/api")
 api_router.include_router(health_router)
 api_router.include_router(me_router)
+api_router.include_router(mentors_router)
 api_router.include_router(users_router)
 
 app.include_router(api_router)
