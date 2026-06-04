@@ -9,11 +9,17 @@ from app.core.auth import get_current_user
 from app.db.dependencies import DbSession
 from app.db.models.mentorship import MentorshipStatus
 from app.schemas.auth import TokenClaims
+from app.schemas.meeting import MeetingResponse
 from app.schemas.mentorship import (
     MentorshipCreate,
     MentorshipListResponse,
     MentorshipResponse,
     UserBrief,
+)
+from app.services.meeting_service import (
+    MentorshipNotActiveError,
+    OnlyMenteeCanRequestError,
+    create_meeting,
 )
 from app.services.mentorship_service import (
     DuplicateMentorshipError,
@@ -292,3 +298,66 @@ async def end_mentorship_relationship(
         ) from err
 
     return _build_response(mentorship)
+
+
+def _build_meeting_response(meeting) -> MeetingResponse:  # type: ignore[no-untyped-def]
+    return MeetingResponse(
+        id=meeting.id,
+        mentorship_id=meeting.mentorship_id,
+        scheduled_time=meeting.scheduled_time,
+        meeting_url=meeting.meeting_url,
+        status=meeting.status,
+        created_at=meeting.created_at,
+        updated_at=meeting.updated_at,
+    )
+
+
+@router.post(
+    "/{mentorship_id}/meetings",
+    response_model=MeetingResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def request_meeting(
+    mentorship_id: UUID,
+    current_user: Annotated[TokenClaims, Depends(get_current_user)],
+    db: DbSession,
+) -> MeetingResponse:
+    if not current_user.username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Token missing username claim",
+        )
+
+    user = await get_or_create_user(
+        db=db,
+        cognito_sub=current_user.sub,
+        email=current_user.username,
+    )
+
+    mentorship = await get_mentorship_by_id(db, mentorship_id, include_users=True)
+    if mentorship is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Mentorship not found",
+        )
+
+    if user.id not in (mentorship.mentor_id, mentorship.mentee_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not a party to this mentorship",
+        )
+
+    try:
+        meeting = await create_meeting(db, mentorship, user)
+    except OnlyMenteeCanRequestError as err:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(err),
+        ) from err
+    except MentorshipNotActiveError as err:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(err),
+        ) from err
+
+    return _build_meeting_response(meeting)
