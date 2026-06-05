@@ -13,6 +13,7 @@ from app.schemas.meeting import (
     MeetingWithUsersResponse,
 )
 from app.schemas.mentorship import UserBrief
+from app.schemas.review import ReviewCreate, ReviewerBrief, ReviewResponse, ReviewUpdate
 from app.services.meeting_service import (
     InvalidMeetingTransitionError,
     InvalidMeetingURLError,
@@ -24,6 +25,15 @@ from app.services.meeting_service import (
     get_meeting_by_id,
     list_user_meetings,
     schedule_meeting,
+)
+from app.services.review_service import (
+    MeetingNotCompletedError,
+    OnlyMenteeCanReviewError,
+    ReviewAlreadyExistsError,
+    ReviewEditWindowExpiredError,
+    create_review,
+    get_review_by_meeting_id,
+    update_review,
 )
 from app.services.user_service import get_or_create_user
 
@@ -218,3 +228,112 @@ async def complete_meeting_endpoint(
         ) from err
 
     return _build_response(meeting)
+
+
+def _build_review_response(review) -> ReviewResponse:  # type: ignore[no-untyped-def]
+    return ReviewResponse(
+        id=review.id,
+        meeting_id=review.meeting_id,
+        reviewer_id=review.reviewer_id,
+        rating=review.rating,
+        comment=review.comment,
+        editable_until=review.editable_until,
+        created_at=review.created_at,
+        updated_at=review.updated_at,
+        reviewer=ReviewerBrief.model_validate(review.reviewer)
+        if review.reviewer
+        else None,
+    )
+
+
+@router.post(
+    "/{meeting_id}/review",
+    response_model=ReviewResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_meeting_review(
+    meeting_id: UUID,
+    current_user: Annotated[TokenClaims, Depends(get_current_user)],
+    db: DbSession,
+    data: ReviewCreate,
+) -> ReviewResponse:
+    if not current_user.username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Token missing username claim",
+        )
+
+    user = await get_or_create_user(
+        db=db,
+        cognito_sub=current_user.sub,
+        email=current_user.username,
+    )
+
+    meeting = await get_meeting_by_id(db, meeting_id, include_mentorship=True)
+    if meeting is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Meeting not found",
+        )
+
+    try:
+        review = await create_review(db, meeting, user, data.rating, data.comment)
+    except MeetingNotCompletedError as err:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(err),
+        ) from err
+    except OnlyMenteeCanReviewError as err:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(err),
+        ) from err
+    except ReviewAlreadyExistsError as err:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(err),
+        ) from err
+
+    return _build_review_response(review)
+
+
+@router.patch("/{meeting_id}/review", response_model=ReviewResponse)
+async def update_meeting_review(
+    meeting_id: UUID,
+    current_user: Annotated[TokenClaims, Depends(get_current_user)],
+    db: DbSession,
+    data: ReviewUpdate,
+) -> ReviewResponse:
+    if not current_user.username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Token missing username claim",
+        )
+
+    user = await get_or_create_user(
+        db=db,
+        cognito_sub=current_user.sub,
+        email=current_user.username,
+    )
+
+    review = await get_review_by_meeting_id(db, meeting_id)
+    if review is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Review not found",
+        )
+
+    try:
+        review = await update_review(db, review, user, data.rating, data.comment)
+    except OnlyMenteeCanReviewError as err:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(err),
+        ) from err
+    except ReviewEditWindowExpiredError as err:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(err),
+        ) from err
+
+    return _build_review_response(review)

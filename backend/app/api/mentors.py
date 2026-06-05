@@ -3,7 +3,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.exc import IntegrityError
 
 from app.core.auth import get_current_user
@@ -17,6 +17,7 @@ from app.schemas.mentor_profile import (
     MentorTopicsUpdate,
     TopicBrief,
 )
+from app.schemas.review import ReviewerBrief, ReviewListResponse, ReviewResponse
 from app.services.mentor_service import (
     create_mentor_profile,
     get_mentor_profile_by_user_id,
@@ -24,6 +25,7 @@ from app.services.mentor_service import (
     replace_mentor_topics,
     update_mentor_profile,
 )
+from app.services.review_service import list_mentor_reviews
 from app.services.user_service import get_or_create_user
 
 router = APIRouter(prefix="/mentors", tags=["mentors"])
@@ -182,3 +184,42 @@ async def replace_my_mentor_topics(
 
     topics = await replace_mentor_topics(db, mentor_profile, data.topic_ids)
     return MentorTopicsResponse(topics=[TopicBrief.model_validate(t) for t in topics])
+
+
+def _build_review_response(review) -> ReviewResponse:  # type: ignore[no-untyped-def]
+    return ReviewResponse(
+        id=review.id,
+        meeting_id=review.meeting_id,
+        reviewer_id=review.reviewer_id,
+        rating=review.rating,
+        comment=review.comment,
+        editable_until=review.editable_until,
+        created_at=review.created_at,
+        updated_at=review.updated_at,
+        reviewer=ReviewerBrief.model_validate(review.reviewer)
+        if review.reviewer
+        else None,
+    )
+
+
+@router.get("/{user_id}/reviews", response_model=ReviewListResponse)
+async def get_mentor_reviews(
+    user_id: UUID,
+    db: DbSession,
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100)] = 20,
+) -> ReviewListResponse:
+    mentor_profile = await get_mentor_profile_by_user_id(db, user_id)
+    if mentor_profile is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Mentor profile not found",
+        )
+
+    reviews, total = await list_mentor_reviews(db, user_id, page, page_size)
+    return ReviewListResponse(
+        reviews=[_build_review_response(r) for r in reviews],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
