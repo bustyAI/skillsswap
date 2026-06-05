@@ -1,5 +1,6 @@
 """Mentorship lifecycle endpoints."""
 
+from datetime import datetime
 from typing import Annotated
 from uuid import UUID
 
@@ -15,6 +16,12 @@ from app.schemas.mentorship import (
     MentorshipListResponse,
     MentorshipResponse,
     UserBrief,
+)
+from app.schemas.message import (
+    MessageCreate,
+    MessageListResponse,
+    MessageResponse,
+    SenderBrief,
 )
 from app.services.meeting_service import (
     MentorshipNotActiveError,
@@ -33,6 +40,17 @@ from app.services.mentorship_service import (
     end_mentorship,
     get_mentorship_by_id,
     list_user_mentorships,
+)
+from app.services.message_service import (
+    MentorshipNotActiveError as MessageMentorshipNotActiveError,
+)
+from app.services.message_service import (
+    NotPartyToMentorshipError as MessageNotPartyError,
+)
+from app.services.message_service import (
+    ThreadNotFoundError,
+    list_messages,
+    send_message,
 )
 from app.services.user_service import get_or_create_user
 
@@ -361,3 +379,134 @@ async def request_meeting(
         ) from err
 
     return _build_meeting_response(meeting)
+
+
+def _build_message_response(message) -> MessageResponse:  # type: ignore[no-untyped-def]
+    return MessageResponse(
+        id=message.id,
+        thread_id=message.thread_id,
+        sender_id=message.sender_id,
+        content=message.content,
+        is_system=message.is_system,
+        created_at=message.created_at,
+        sender=SenderBrief.model_validate(message.sender) if message.sender else None,
+    )
+
+
+@router.get("/{mentorship_id}/messages", response_model=MessageListResponse)
+async def get_messages(
+    mentorship_id: UUID,
+    current_user: Annotated[TokenClaims, Depends(get_current_user)],
+    db: DbSession,
+    limit: Annotated[int, Query(ge=1, le=100)] = 50,
+    cursor: Annotated[str | None, Query()] = None,
+) -> MessageListResponse:
+    """Get messages for a mentorship with cursor-based pagination.
+
+    Returns messages newest first. Use the next_cursor from the response
+    to fetch older messages.
+    """
+    if not current_user.username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Token missing username claim",
+        )
+
+    user = await get_or_create_user(
+        db=db,
+        cognito_sub=current_user.sub,
+        email=current_user.username,
+    )
+
+    mentorship = await get_mentorship_by_id(db, mentorship_id, include_users=True)
+    if mentorship is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Mentorship not found",
+        )
+
+    cursor_dt: datetime | None = None
+    if cursor:
+        try:
+            cursor_dt = datetime.fromisoformat(cursor)
+        except ValueError as err:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid cursor format",
+            ) from err
+
+    try:
+        messages, next_cursor, has_more = await list_messages(
+            db, mentorship, user, limit=limit, cursor=cursor_dt
+        )
+    except MessageNotPartyError as err:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(err),
+        ) from err
+    except ThreadNotFoundError as err:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(err),
+        ) from err
+
+    return MessageListResponse(
+        messages=[_build_message_response(m) for m in messages],
+        next_cursor=next_cursor.isoformat() if next_cursor else None,
+        has_more=has_more,
+    )
+
+
+@router.post(
+    "/{mentorship_id}/messages",
+    response_model=MessageResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_message(
+    mentorship_id: UUID,
+    current_user: Annotated[TokenClaims, Depends(get_current_user)],
+    db: DbSession,
+    data: MessageCreate,
+) -> MessageResponse:
+    """Send a message in a mentorship thread.
+
+    Only works for ACTIVE mentorships. Sender must be a party to the mentorship.
+    """
+    if not current_user.username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Token missing username claim",
+        )
+
+    user = await get_or_create_user(
+        db=db,
+        cognito_sub=current_user.sub,
+        email=current_user.username,
+    )
+
+    mentorship = await get_mentorship_by_id(db, mentorship_id, include_users=True)
+    if mentorship is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Mentorship not found",
+        )
+
+    try:
+        message = await send_message(db, mentorship, user, data.content)
+    except MessageMentorshipNotActiveError as err:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(err),
+        ) from err
+    except MessageNotPartyError as err:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(err),
+        ) from err
+    except ThreadNotFoundError as err:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(err),
+        ) from err
+
+    return _build_message_response(message)
