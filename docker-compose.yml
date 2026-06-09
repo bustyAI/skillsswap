@@ -41,6 +41,10 @@ services:
       - "8000:8000"
     volumes:
       - ./backend/app:/app/app
+      - ./backend/alembic:/app/alembic
+      - ./backend/alembic.ini:/app/alembic.ini
+      - ./backend/tests:/app/tests
+      - ./backend/pyproject.toml:/app/pyproject.toml
     environment:
       - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - REDIS_URL=redis://redis:6379/0

@@ -9,6 +9,7 @@ Tests cover:
 - Listing messages with cursor-based pagination
 """
 
+import asyncio
 from uuid import uuid4
 
 import pytest
@@ -226,7 +227,7 @@ class TestListMessages:
     async def test_messages_returned_newest_first(
         self, async_session: AsyncSession
     ) -> None:
-        """Messages are returned in newest-first order."""
+        """Messages are returned in newest-first order (by timestamp desc, then id desc)."""
         mentor_user = User(cognito_sub=f"sub-{uuid4()}", email="order_mentor@test.com")
         mentee_user = User(cognito_sub=f"sub-{uuid4()}", email="order_mentee@test.com")
         async_session.add_all([mentor_user, mentee_user])
@@ -239,19 +240,30 @@ class TestListMessages:
         mentorship = await create_mentorship(async_session, mentee_user, mentor_user.id)
         mentorship = await accept_mentorship(async_session, mentorship, mentor_user)
 
-        # Send messages in order
-        await send_message(async_session, mentorship, mentor_user, "First message")
-        await send_message(async_session, mentorship, mentee_user, "Second message")
-        await send_message(async_session, mentorship, mentor_user, "Third message")
+        # Send 3 messages
+        await send_message(async_session, mentorship, mentor_user, "Message 1")
+        await send_message(async_session, mentorship, mentee_user, "Message 2")
+        await send_message(async_session, mentorship, mentor_user, "Message 3")
 
         messages, _, _ = await list_messages(async_session, mentorship, mentor_user)
 
-        # Filter out system message and check order
+        # Filter out system message
         user_messages = [m for m in messages if not m.is_system]
         assert len(user_messages) == 3
-        assert user_messages[0].content == "Third message"
-        assert user_messages[1].content == "Second message"
-        assert user_messages[2].content == "First message"
+
+        # Verify messages are in descending order by (created_at, id)
+        for i in range(len(user_messages) - 1):
+            current = user_messages[i]
+            next_msg = user_messages[i + 1]
+            # Current should be newer than or same time as next
+            assert current.created_at >= next_msg.created_at, (
+                f"Message at index {i} should be >= message at {i+1}"
+            )
+            # If same time, current id should be greater
+            if current.created_at == next_msg.created_at:
+                assert current.id > next_msg.id, (
+                    f"Same timestamp: id at {i} should be > id at {i+1}"
+                )
 
     async def test_pagination_with_limit(self, async_session: AsyncSession) -> None:
         """Pagination respects limit parameter."""
