@@ -127,3 +127,5 @@ async def resolve_report(
         )
     )
     return result.scalar_one()
+
+

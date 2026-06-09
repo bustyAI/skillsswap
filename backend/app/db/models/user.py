@@ -11,9 +11,10 @@ Key behaviors:
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Index, String
+from sqlalchemy import DateTime, Index, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, SoftDeleteMixin, TimestampMixin, UUIDPrimaryKeyMixin
@@ -66,6 +67,13 @@ class User(Base, UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin):
     avatar_url: Mapped[str | None] = mapped_column(
         String(500),
         nullable=True,
+    )
+
+    # Admin moderation: when the user was banned (separate from soft-delete)
+    banned_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        index=True,
     )
 
     # Relationship to MentorProfile (one-to-one, optional)

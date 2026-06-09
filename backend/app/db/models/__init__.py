@@ -7,6 +7,7 @@ Example:
     from app.db.models import User, MentorProfile, Topic
 """
 
+from app.db.models.audit_log import AuditAction, AuditLog
 from app.db.models.block import Block
 from app.db.models.meeting import Meeting, MeetingStatus
 from app.db.models.mentor_embedding import MentorEmbedding
@@ -43,4 +44,6 @@ __all__ = [
     "Report",
     "ReportStatus",
     "Block",
+    "AuditLog",
+    "AuditAction",
 ]

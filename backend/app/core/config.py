@@ -27,6 +27,16 @@ class Settings(BaseSettings):
     cognito_user_pool_id: str
     cognito_app_client_id: str
 
+    # Admin user IDs (comma-separated Cognito subs)
+    admin_user_ids: str = ""
+
+    @property
+    def admin_user_ids_set(self) -> set[str]:
+        """Parse admin IDs into a set for O(1) lookup."""
+        if not self.admin_user_ids:
+            return set()
+        return {uid.strip() for uid in self.admin_user_ids.split(",") if uid.strip()}
+
     @property
     def cognito_jwks_url(self) -> str:
         """JWKS endpoint URL computed from region and pool ID.
