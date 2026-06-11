@@ -108,7 +108,7 @@ async def disable_mentor(
     action = AuditAction.ENABLE_MENTOR if new_state else AuditAction.DISABLE_MENTOR
 
     await log_admin_action(
-        db,
+        db, 
         admin_id=admin_id,
         action=action,
         target_user_id=target_user_id,
