@@ -96,11 +96,12 @@ async def list_messages(
     user: User,
     *,
     limit: int = 50,
-    cursor: datetime | None = None,
-) -> tuple[list[Message], datetime | None, bool]:
+    cursor: str | None = None,
+) -> tuple[list[Message], str | None, bool]:
     """List messages in a mentorship thread with cursor-based pagination.
 
-    Returns newest first. Cursor is the created_at of the last message.
+    Returns newest first. Cursor is a composite of created_at and id
+    to handle messages with identical timestamps.
 
     Returns:
         Tuple of (messages, next_cursor, has_more)
@@ -109,6 +110,8 @@ async def list_messages(
         NotPartyToMentorshipError: If user is not a party to the mentorship.
         ThreadNotFoundError: If no message thread exists.
     """
+    from uuid import UUID
+
     if user.id not in (mentorship.mentor_id, mentorship.mentee_id):
         raise NotPartyToMentorshipError("You are not a party to this mentorship")
 
@@ -120,12 +123,20 @@ async def list_messages(
         select(Message)
         .where(Message.thread_id == thread.id)
         .options(selectinload(Message.sender))
-        .order_by(Message.created_at.desc())
+        .order_by(Message.created_at.desc(), Message.id.desc())
         .limit(limit + 1)
     )
 
     if cursor is not None:
-        query = query.where(Message.created_at < cursor)
+        # Parse composite cursor: "timestamp|uuid"
+        cursor_parts = cursor.split("|")
+        cursor_time = datetime.fromisoformat(cursor_parts[0])
+        cursor_id = UUID(cursor_parts[1])
+        # Fetch messages older than cursor OR same time but smaller id
+        query = query.where(
+            (Message.created_at < cursor_time)
+            | ((Message.created_at == cursor_time) & (Message.id < cursor_id))
+        )
 
     result = await db.execute(query)
     messages = list(result.scalars().all())
@@ -134,6 +145,11 @@ async def list_messages(
     if has_more:
         messages = messages[:limit]
 
-    next_cursor = messages[-1].created_at if messages and has_more else None
+    # Build composite cursor from last message
+    if messages and has_more:
+        last_msg = messages[-1]
+        next_cursor = f"{last_msg.created_at.isoformat()}|{last_msg.id}"
+    else:
+        next_cursor = None
 
     return messages, next_cursor, has_more

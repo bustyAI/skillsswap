@@ -55,12 +55,17 @@ async def ban_user(
     reason: str,
     ip_address: str | None = None,
 ) -> User:
-    user = await get_user_by_id(db, target_user_id)
+    # First check if user exists at all (including deleted/banned)
+    user = await get_user_by_id(db, target_user_id, include_deleted=True)
     if user is None:
         raise UserNotFoundError(f"User {target_user_id} not found")
 
     if user.banned_at is not None:
         raise UserAlreadyBannedError(f"User {target_user_id} is already banned")
+
+    # Also check if user was soft-deleted (but not banned)
+    if user.deleted_at is not None and user.banned_at is None:
+        raise UserNotFoundError(f"User {target_user_id} not found")
 
     now = datetime.now(UTC)
     user.banned_at = now

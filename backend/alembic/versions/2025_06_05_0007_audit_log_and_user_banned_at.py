@@ -13,6 +13,7 @@ from collections.abc import Sequence
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy.dialects import postgresql
 
 revision: str = "0007"
 down_revision: str | None = "0006"
@@ -46,7 +47,7 @@ def upgrade() -> None:
         sa.Column("admin_id", sa.UUID(), nullable=True),
         sa.Column(
             "action",
-            sa.Enum(
+            postgresql.ENUM(
                 "BAN_USER",
                 "UNBAN_USER",
                 "DISABLE_MENTOR",
