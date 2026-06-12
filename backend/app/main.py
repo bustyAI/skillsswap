@@ -1,3 +1,7 @@
+import logging
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+
 from fastapi import APIRouter, FastAPI
 
 from app.api.admin import router as admin_router
@@ -9,11 +13,24 @@ from app.api.mentorships import router as mentorships_router
 from app.api.reports import router as reports_router
 from app.api.topics import router as topics_router
 from app.api.users import router as users_router
+from app.recommender.embeddings import get_embedding_model
+
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    logger.info("Starting up: loading embedding model")
+    get_embedding_model()
+    logger.info("Embedding model ready")
+    yield
+
 
 app = FastAPI(
     title="SkillSwap API",
     description="Mentorship platform API",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 # Parent router for all API routes - add new routers here
