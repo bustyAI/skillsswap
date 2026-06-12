@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import APIRouter, FastAPI
 
 from app.api.admin import router as admin_router
+from app.api.debug import router as debug_router
 from app.api.health import router as health_router
 from app.api.me import router as me_router
 from app.api.meetings import router as meetings_router
@@ -44,5 +45,6 @@ api_router.include_router(reports_router)
 api_router.include_router(topics_router)
 api_router.include_router(users_router)
 api_router.include_router(admin_router)
+api_router.include_router(debug_router)
 
 app.include_router(api_router)
