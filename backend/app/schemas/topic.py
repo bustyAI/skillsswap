@@ -68,3 +68,19 @@ class TopicSearchResponse(BaseModel):
 
     items: list[TopicSearchResult]
     query: str
+
+
+class TopicCreate(BaseModel):
+    """Schema for creating a topic."""
+
+    name: str = Field(..., min_length=1, max_length=100)
+    description: str | None = None
+    parent_topic_id: UUID | None = None
+
+
+class TopicUpdate(BaseModel):
+    """Schema for updating a topic."""
+
+    name: str | None = Field(default=None, min_length=1, max_length=100)
+    description: str | None = None
+    parent_topic_id: UUID | None = None

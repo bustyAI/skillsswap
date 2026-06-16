@@ -9,6 +9,8 @@ from app.db.models.mentor_profile import MentorProfile
 from app.db.models.mentor_topic import MentorTopic
 from app.db.models.topic import Topic
 from app.db.models.user import User
+from app.schemas.topic import TopicCreate, TopicUpdate
+from app.services.embedding_service import generate_topic_embedding
 
 
 async def list_topics(
@@ -100,3 +102,40 @@ async def search_topics(
 
     result = await db.execute(stmt)
     return [(row[0], float(row[1])) for row in result.all()]
+
+
+async def create_topic(
+    db: AsyncSession,
+    data: TopicCreate,
+) -> Topic:
+    """Create a new topic and generate its embedding."""
+    topic = Topic(
+        name=data.name,
+        description=data.description,
+        parent_topic_id=data.parent_topic_id,
+    )
+    db.add(topic)
+    await db.commit()
+    await db.refresh(topic)
+    await generate_topic_embedding(db, topic)
+    await db.commit()
+    return topic
+
+
+async def update_topic(
+    db: AsyncSession,
+    topic: Topic,
+    data: TopicUpdate,
+) -> Topic:
+    """Update a topic and regenerate its embedding."""
+    update_data = data.model_dump(exclude_unset=True)
+
+    if update_data:
+        for field, value in update_data.items():
+            setattr(topic, field, value)
+        await db.commit()
+        await db.refresh(topic)
+        await generate_topic_embedding(db, topic)
+        await db.commit()
+
+    return topic
