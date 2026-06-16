@@ -11,6 +11,7 @@ from app.db.models.mentor_topic import MentorTopic
 from app.db.models.topic import Topic
 from app.db.models.user import User
 from app.schemas.mentor_profile import MentorProfileCreate, MentorProfileUpdate
+from app.services.embedding_service import generate_mentor_embedding
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +50,8 @@ async def create_mentor_profile(
     db.add(mentor_profile)
     await db.commit()
     await db.refresh(mentor_profile)
+    await generate_mentor_embedding(db, mentor_profile.id)
+    await db.commit()
     return mentor_profile
 
 
@@ -65,9 +68,8 @@ async def update_mentor_profile(
             setattr(mentor_profile, field, value)
         await db.commit()
         await db.refresh(mentor_profile)
-        logger.info(
-            "TODO: regenerate embedding for mentor_profile %s", mentor_profile.id
-        )
+        await generate_mentor_embedding(db, mentor_profile.id)
+        await db.commit()
 
     return mentor_profile
 
@@ -122,6 +124,7 @@ async def replace_mentor_topics(
             db.add(mentor_topic)
 
     await db.commit()
-    logger.info("TODO: regenerate embedding for mentor_profile %s", mentor_profile.id)
+    await generate_mentor_embedding(db, mentor_profile.id)
+    await db.commit()
 
     return sorted(topics, key=lambda t: t.name)
