@@ -21,7 +21,7 @@ services:
     image: redis:7-alpine
     container_name: skillswap-redis
     ports:
-      - "6379:6379"
+      - "16379:6379"
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
@@ -44,6 +44,7 @@ services:
       - ./backend/alembic:/app/alembic
       - ./backend/alembic.ini:/app/alembic.ini
       - ./backend/tests:/app/tests
+      - ./backend/scripts:/app/scripts
       - ./backend/pyproject.toml:/app/pyproject.toml
     environment:
       - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}

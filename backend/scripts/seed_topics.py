@@ -140,7 +140,7 @@ async def main() -> None:
     # Get database URL from environment or use default
     database_url = os.environ.get(
         "DATABASE_URL",
-        "postgresql+asyncpg://skillswap:skillswap_dev_123@localhost:5433/skillswap",
+        "postgresql+asyncpg://skillswap:skillswap_dev_123@localhost:5432/skillswap",
     )
 
     # Ensure it's an async URL
