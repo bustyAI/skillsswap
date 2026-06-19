@@ -242,3 +242,209 @@ async def test_recommend_mentors_filters_banned_user(
     )
 
     assert len(results) == 0
+
+
+@pytest.mark.asyncio
+async def test_recommend_mentors_filters_deleted_user(
+    async_session: AsyncSession,
+) -> None:
+    """Test that soft-deleted users are excluded from recommendations."""
+    requesting_user = await _create_user(async_session, "requester@test.com")
+    topic = await _create_topic_with_embedding(async_session, "Testing")
+
+    deleted_user = await _create_user(
+        async_session, "deleted@test.com", deleted_at=datetime.now(UTC)
+    )
+    profile = await _create_mentor_profile(
+        async_session, deleted_user, bio="Deleted mentor"
+    )
+    await _create_mentor_embedding(async_session, profile, "Testing software QA")
+    await async_session.commit()
+
+    results = await recommend_mentors(
+        async_session, requesting_user.id, topic.id, limit=10
+    )
+
+    assert len(results) == 0
+
+
+@pytest.mark.asyncio
+async def test_recommend_mentors_excludes_self(async_session: AsyncSession) -> None:
+    """Test that the requesting user's own profile is excluded."""
+    user = await _create_user(async_session, "self@test.com")
+    topic = await _create_topic_with_embedding(async_session, "Testing")
+
+    profile = await _create_mentor_profile(async_session, user, bio="Self mentor")
+    await _create_mentor_embedding(async_session, profile, "Testing software QA")
+    await async_session.commit()
+
+    results = await recommend_mentors(async_session, user.id, topic.id, limit=10)
+
+    assert len(results) == 0
+
+
+@pytest.mark.asyncio
+async def test_recommend_mentors_excludes_blocked_by_user(
+    async_session: AsyncSession,
+) -> None:
+    """Test that mentors blocked by the requesting user are excluded."""
+    requesting_user = await _create_user(async_session, "requester@test.com")
+    topic = await _create_topic_with_embedding(async_session, "Testing")
+
+    blocked_mentor_user = await _create_user(async_session, "blocked@test.com")
+    profile = await _create_mentor_profile(
+        async_session, blocked_mentor_user, bio="Blocked mentor"
+    )
+    await _create_mentor_embedding(async_session, profile, "Testing software QA")
+
+    block = Block(blocker_id=requesting_user.id, blocked_id=blocked_mentor_user.id)
+    async_session.add(block)
+    await async_session.commit()
+
+    results = await recommend_mentors(
+        async_session, requesting_user.id, topic.id, limit=10
+    )
+
+    assert len(results) == 0
+
+
+@pytest.mark.asyncio
+async def test_recommend_mentors_excludes_user_who_blocked_requester(
+    async_session: AsyncSession,
+) -> None:
+    """Test that mentors who blocked the requesting user are excluded."""
+    requesting_user = await _create_user(async_session, "requester@test.com")
+    topic = await _create_topic_with_embedding(async_session, "Testing")
+
+    blocking_mentor_user = await _create_user(async_session, "blocking@test.com")
+    profile = await _create_mentor_profile(
+        async_session, blocking_mentor_user, bio="Blocking mentor"
+    )
+    await _create_mentor_embedding(async_session, profile, "Testing software QA")
+
+    block = Block(blocker_id=blocking_mentor_user.id, blocked_id=requesting_user.id)
+    async_session.add(block)
+    await async_session.commit()
+
+    results = await recommend_mentors(
+        async_session, requesting_user.id, topic.id, limit=10
+    )
+
+    assert len(results) == 0
+
+
+@pytest.mark.asyncio
+async def test_recommend_mentors_empty_when_no_topic_embedding(
+    async_session: AsyncSession,
+) -> None:
+    """Test that empty list is returned when topic has no embedding."""
+    requesting_user = await _create_user(async_session, "requester@test.com")
+
+    topic = Topic(name="No Embedding Topic", description="Test")
+    async_session.add(topic)
+    await async_session.commit()
+
+    results = await recommend_mentors(
+        async_session, requesting_user.id, topic.id, limit=10
+    )
+
+    assert results == []
+
+
+@pytest.mark.asyncio
+async def test_recommend_mentors_empty_when_no_mentors(
+    async_session: AsyncSession,
+) -> None:
+    """Test that empty list is returned when no mentor embeddings exist."""
+    requesting_user = await _create_user(async_session, "requester@test.com")
+    topic = await _create_topic_with_embedding(async_session, "Obscure Topic")
+    await async_session.commit()
+
+    results = await recommend_mentors(
+        async_session, requesting_user.id, topic.id, limit=10
+    )
+
+    assert results == []
+
+
+@pytest.mark.asyncio
+async def test_recommend_mentors_respects_limit(async_session: AsyncSession) -> None:
+    """Test that the limit parameter is respected."""
+    requesting_user = await _create_user(async_session, "requester@test.com")
+    topic = await _create_topic_with_embedding(async_session, "Programming")
+
+    for i in range(5):
+        user = await _create_user(async_session, f"mentor{i}@test.com")
+        profile = await _create_mentor_profile(
+            async_session, user, bio=f"Programming mentor {i}"
+        )
+        await _create_mentor_embedding(
+            async_session, profile, "Programming coding developer"
+        )
+
+    await async_session.commit()
+
+    results = await recommend_mentors(
+        async_session, requesting_user.id, topic.id, limit=3
+    )
+
+    assert len(results) == 3
+
+
+@pytest.mark.asyncio
+async def test_recommend_mentors_moderation_penalty_affects_ranking(
+    async_session: AsyncSession,
+) -> None:
+    """Test that open reports reduce a mentor's ranking score."""
+    requesting_user = await _create_user(async_session, "requester@test.com")
+    reporter = await _create_user(async_session, "reporter@test.com")
+    topic = await _create_topic_with_embedding(async_session, "Python")
+
+    # Mentor with reports
+    user_reported = await _create_user(async_session, "reported@test.com")
+    profile_reported = await _create_mentor_profile(
+        async_session,
+        user_reported,
+        bio="Python expert",
+        rating_avg=Decimal("5.0"),
+        rating_count=10,
+        last_active_at=datetime.now(UTC),
+    )
+    await _create_mentor_embedding(
+        async_session, profile_reported, "Python programming expert"
+    )
+
+    # Add multiple open reports
+    for _ in range(5):
+        report = Report(
+            reporter_id=reporter.id,
+            reported_user_id=user_reported.id,
+            reason="Test report",
+            status=ReportStatus.PENDING,
+        )
+        async_session.add(report)
+
+    # Clean mentor with same stats
+    user_clean = await _create_user(async_session, "clean@test.com")
+    profile_clean = await _create_mentor_profile(
+        async_session,
+        user_clean,
+        bio="Python expert",
+        rating_avg=Decimal("5.0"),
+        rating_count=10,
+        last_active_at=datetime.now(UTC),
+    )
+    await _create_mentor_embedding(
+        async_session, profile_clean, "Python programming expert"
+    )
+
+    await async_session.commit()
+
+    results = await recommend_mentors(
+        async_session, requesting_user.id, topic.id, limit=10
+    )
+
+    assert len(results) == 2
+    # Clean mentor should rank higher due to no moderation penalty
+    assert results[0][0] == user_clean.id
+    assert results[1][0] == user_reported.id
