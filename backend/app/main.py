@@ -14,6 +14,7 @@ from app.api.mentorships import router as mentorships_router
 from app.api.reports import router as reports_router
 from app.api.topics import router as topics_router
 from app.api.users import router as users_router
+from app.core.redis import close_redis, init_redis
 from app.recommender.embeddings import get_embedding_model
 
 logger = logging.getLogger(__name__)
@@ -24,7 +25,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Starting up: loading embedding model")
     get_embedding_model()
     logger.info("Embedding model ready")
+    logger.info("Starting up: connecting to Redis")
+    await init_redis()
+    logger.info("Redis connected")
     yield
+    logger.info("Shutting down: closing Redis connection")
+    await close_redis()
 
 
 app = FastAPI(
