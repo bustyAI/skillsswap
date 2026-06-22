@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     # Admin user IDs (comma-separated Cognito subs)
     admin_user_ids: str = ""
 
+    # Rate limiting
+    recommendations_rate_limit_per_minute: int = 30
+    recommendations_cache_ttl_seconds: int = 300
+
     @property
     def admin_user_ids_set(self) -> set[str]:
         """Parse admin IDs into a set for O(1) lookup."""
