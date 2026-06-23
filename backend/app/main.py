@@ -11,6 +11,7 @@ from app.api.me import router as me_router
 from app.api.meetings import router as meetings_router
 from app.api.mentors import router as mentors_router
 from app.api.mentorships import router as mentorships_router
+from app.api.recommendations import router as recommendations_router
 from app.api.reports import router as reports_router
 from app.api.topics import router as topics_router
 from app.api.users import router as users_router
@@ -47,6 +48,7 @@ api_router.include_router(me_router)
 api_router.include_router(meetings_router)
 api_router.include_router(mentors_router)
 api_router.include_router(mentorships_router)
+api_router.include_router(recommendations_router)
 api_router.include_router(reports_router)
 api_router.include_router(topics_router)
 api_router.include_router(users_router)
