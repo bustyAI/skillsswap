@@ -12,6 +12,9 @@ RUN uv sync --no-dev --no-install-project
 
 # copy code
 COPY app/ ./app/
+COPY alembic/ ./alembic/
+COPY alembic.ini ./
+COPY scripts/ ./scripts/
 
 # installing project
 RUN uv sync --no-dev
