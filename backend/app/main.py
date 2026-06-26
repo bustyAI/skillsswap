@@ -1,8 +1,10 @@
 import logging
+import os
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import APIRouter, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.admin import router as admin_router
 from app.api.debug import router as debug_router
@@ -39,6 +41,17 @@ app = FastAPI(
     description="Mentorship platform API",
     version="0.1.0",
     lifespan=lifespan,
+)
+
+cors_origins = os.getenv(
+    "CORS_ORIGINS", "http://localhost:3000,http://localhost:3001"
+).split(",")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=cors_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Parent router for all API routes - add new routers here
