@@ -100,16 +100,16 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         ) from e
 
-    # Verify token_use is "access" (not "id" token)
-    if payload.get("token_use") != "access":
+    # Verify token_use is "id" (ID tokens have email claim)
+    if payload.get("token_use") != "id":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token_use, expected 'access'",
+            detail="Invalid token_use, expected 'id'",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Verify client_id matches our app
-    if payload.get("client_id") != settings.cognito_app_client_id:
+    # Verify aud matches our app (ID tokens use 'aud', not 'client_id')
+    if payload.get("aud") != settings.cognito_app_client_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token was not issued for this application",
@@ -117,12 +117,13 @@ async def get_current_user(
         )
 
     # Return validated claims as Pydantic model
+    # ID tokens have 'email' claim, use it as username
     return TokenClaims(
         sub=payload["sub"],
         iss=payload["iss"],
         token_use=payload["token_use"],
         exp=payload["exp"],
         iat=payload["iat"],
-        client_id=payload["client_id"],
-        username=payload.get("username"),
+        client_id=payload.get("aud", ""),
+        username=payload.get("email"),
     )

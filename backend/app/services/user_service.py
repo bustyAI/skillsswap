@@ -43,10 +43,17 @@ async def get_or_create_user(
     cognito_sub: str,
     email: str,
 ) -> User:
-    """Get existing user or create new one (just-in-time provisioning)."""
+    """Get existing user or create new one (just-in-time provisioning).
+
+    Also updates email if it changed (handles migration from old token format).
+    """
     user = await get_user_by_cognito_sub(db, cognito_sub)
     if user is None:
         user = await create_user(db, cognito_sub, email)
+    elif user.email != email:
+        user.email = email
+        await db.commit()
+        await db.refresh(user)
     return user
 
 

@@ -37,7 +37,8 @@ export function getSession(): Promise<CognitoUserSession | null> {
 export function getAccessToken(): Promise<string | null> {
   return getSession().then((session) => {
     if (!session) return null;
-    return session.getAccessToken().getJwtToken();
+    // Use ID token instead of access token - it contains the email claim
+    return session.getIdToken().getJwtToken();
   });
 }
 
