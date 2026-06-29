@@ -50,8 +50,8 @@ async def get_or_create_user(
     user = await get_user_by_cognito_sub(db, cognito_sub)
     if user is None:
         user = await create_user(db, cognito_sub, email)
-    elif user.email != email:
         user.email = email
+    elif user.email != email:
         await db.commit()
         await db.refresh(user)
     return user
