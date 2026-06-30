@@ -4,7 +4,7 @@ import { use, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
-import { useMentorProfile, useMentorReviews } from "@/hooks/use-mentors";
+import { useMentorProfile, useMentorReviews, useMentorTopics } from "@/hooks/use-mentors";
 import { useCreateMentorship } from "@/hooks/use-mentorship";
 import { ApiError } from "@/lib/api";
 
@@ -51,6 +51,11 @@ export default function MentorPage({ params }: PageProps) {
     isLoading: reviewsLoading,
     error: reviewsError,
   } = useMentorReviews(userId);
+
+  const {
+    data: topicsData,
+    isLoading: topicsLoading,
+  } = useMentorTopics(userId);
 
   const createMentorship = useCreateMentorship();
 
@@ -131,6 +136,38 @@ export default function MentorPage({ params }: PageProps) {
               </p>
             </div>
           )}
+
+          <div className="mt-6">
+            <h2 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
+              Topics
+            </h2>
+            {topicsLoading ? (
+              <div className="mt-2 flex gap-2">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-6 w-20 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : topicsData && topicsData.topics.length > 0 ? (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {topicsData.topics.map((topic) => (
+                  <Link
+                    key={topic.id}
+                    href={`/topics/${topic.id}`}
+                    className="px-3 py-1 text-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                  >
+                    {topic.name}
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+                No topics listed
+              </p>
+            )}
+          </div>
 
           <div className="mt-6 pt-6 border-t border-zinc-200 dark:border-zinc-700">
             {authLoading ? (

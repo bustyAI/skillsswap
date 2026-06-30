@@ -1,14 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/providers/auth-provider";
-
-interface User {
-  id: string;
-  email: string;
-  display_name: string | null;
-  avatar_url: string | null;
-  created_at: string;
-}
+import type { User, UserUpdateRequest } from "@/lib/types";
 
 export function useUser() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -26,4 +19,20 @@ export function useUser() {
     error: query.error,
     refetch: query.refetch,
   };
+}
+
+export function useUpdateUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: UserUpdateRequest) => {
+      return apiFetch<User>("/users/me", {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user", "me"] });
+    },
+  });
 }

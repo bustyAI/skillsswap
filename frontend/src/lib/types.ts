@@ -116,3 +116,64 @@ export interface Mentorship {
   mentor: UserBrief | null;
   mentee: UserBrief | null;
 }
+
+export interface MentorshipListResponse {
+  items: Mentorship[];
+  total: number;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserUpdateRequest {
+  display_name?: string | null;
+}
+
+export interface Meeting {
+  id: string;
+  mentorship_id: string;
+  status: "REQUESTED" | "SCHEDULED" | "COMPLETED" | "CANCELLED";
+  scheduled_time: string | null;
+  meeting_url: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  mentorship?: Mentorship;
+}
+
+export interface MeetingListResponse {
+  items: Meeting[];
+  total: number;
+}
+
+export interface MyMentorProfile {
+  id: string;
+  user_id: string;
+  bio: string | null;
+  headline: string | null;
+  is_enabled: boolean;
+  rating_avg: number | null;
+  rating_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MentorProfileCreateRequest {
+  bio?: string | null;
+  headline?: string | null;
+}
+
+export interface MentorProfileUpdateRequest {
+  bio?: string | null;
+  headline?: string | null;
+}
+
+export interface MentorTopicsUpdateRequest {
+  topic_ids: string[];
+}

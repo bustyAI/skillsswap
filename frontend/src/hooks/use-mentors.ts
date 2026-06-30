@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import type {
   MentorProfile,
+  MentorTopicsResponse,
   RecommendationsResponse,
   ReviewListResponse,
   TopicMentorsResponse,
@@ -36,6 +37,14 @@ export function useMentorProfile(userId: string | undefined) {
   return useQuery({
     queryKey: ["mentorProfile", userId],
     queryFn: () => apiFetch<MentorProfile>(`/mentors/${userId}`),
+    enabled: !!userId,
+  });
+}
+
+export function useMentorTopics(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["mentorTopics", userId],
+    queryFn: () => apiFetch<MentorTopicsResponse>(`/mentors/${userId}/topics`),
     enabled: !!userId,
   });
 }
