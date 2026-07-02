@@ -1,8 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import type {
   MentorProfile,
+  MentorProfileCreateRequest,
+  MentorProfileUpdateRequest,
   MentorTopicsResponse,
+  MyMentorProfile,
   RecommendationsResponse,
   ReviewListResponse,
   TopicMentorsResponse,
@@ -61,5 +64,69 @@ export function useMentorReviews(
         `/mentors/${userId}/reviews?page=${page}&page_size=${pageSize}`
       ),
     enabled: !!userId,
+  });
+}
+
+export function useMyMentorProfile() {
+  return useQuery({
+    queryKey: ["mentorProfile", "me"],
+    queryFn: () => apiFetch<MyMentorProfile>("/mentors/me"),
+    retry: false,
+  });
+}
+
+export function useMyMentorTopics() {
+  return useQuery({
+    queryKey: ["mentorTopics", "me"],
+    queryFn: () => apiFetch<MentorTopicsResponse>("/mentors/me/topics"),
+    retry: false,
+  });
+}
+
+export function useCreateMentorProfile() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: MentorProfileCreateRequest) => {
+      return apiFetch<MyMentorProfile>("/mentors/me", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["mentorProfile", "me"] });
+    },
+  });
+}
+
+export function useUpdateMentorProfile() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: MentorProfileUpdateRequest) => {
+      return apiFetch<MyMentorProfile>("/mentors/me", {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["mentorProfile", "me"] });
+    },
+  });
+}
+
+export function useUpdateMentorTopics() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (topicIds: string[]) => {
+      return apiFetch<MentorTopicsResponse>("/mentors/me/topics", {
+        method: "POST",
+        body: JSON.stringify({ topic_ids: topicIds }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["mentorTopics", "me"] });
+    },
   });
 }
