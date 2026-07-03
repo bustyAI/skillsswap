@@ -177,3 +177,38 @@ export interface MentorProfileUpdateRequest {
 export interface MentorTopicsUpdateRequest {
   topic_ids: string[];
 }
+
+export interface Message {
+  id: string;
+  thread_id: string;
+  sender_id: string;
+  body: string;
+  created_at: string;
+  sender: UserBrief | null;
+}
+
+export interface MessageListResponse {
+  items: Message[];
+  total: number;
+  has_next: boolean;
+  cursor: string | null;
+}
+
+export interface MessageCreate {
+  body: string;
+}
+
+export interface MeetingScheduleRequest {
+  scheduled_time: string;
+  meeting_url: string;
+}
+
+export interface ReviewCreate {
+  rating: number;
+  comment?: string | null;
+}
+
+export interface ReviewUpdate {
+  rating?: number;
+  comment?: string | null;
+}

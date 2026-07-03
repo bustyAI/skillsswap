@@ -13,6 +13,14 @@ export function useMyMentorships() {
   });
 }
 
+export function useMentorship(mentorshipId: string | undefined) {
+  return useQuery({
+    queryKey: ["mentorships", mentorshipId],
+    queryFn: () => apiFetch<Mentorship>(`/mentorships/${mentorshipId}`),
+    enabled: !!mentorshipId,
+  });
+}
+
 export function useCreateMentorship() {
   const queryClient = useQueryClient();
 
@@ -25,6 +33,38 @@ export function useCreateMentorship() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["mentorships"] });
+    },
+  });
+}
+
+export function useAcceptMentorship() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (mentorshipId: string) => {
+      return apiFetch<Mentorship>(`/mentorships/${mentorshipId}/accept`, {
+        method: "POST",
+      });
+    },
+    onSuccess: (_data, mentorshipId) => {
+      queryClient.invalidateQueries({ queryKey: ["mentorships"] });
+      queryClient.invalidateQueries({ queryKey: ["mentorships", mentorshipId] });
+    },
+  });
+}
+
+export function useEndMentorship() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (mentorshipId: string) => {
+      return apiFetch<Mentorship>(`/mentorships/${mentorshipId}/end`, {
+        method: "POST",
+      });
+    },
+    onSuccess: (_data, mentorshipId) => {
+      queryClient.invalidateQueries({ queryKey: ["mentorships"] });
+      queryClient.invalidateQueries({ queryKey: ["mentorships", mentorshipId] });
     },
   });
 }
