@@ -8,7 +8,15 @@ from app.core.admin import AdminUser
 from app.db.dependencies import DbSession
 from app.db.models.audit_log import AuditAction
 from app.db.models.report import ReportStatus
-from app.schemas.admin import AdminActionResponse, BanUserRequest, DisableMentorRequest
+from app.schemas.admin import (
+    AdminActionResponse,
+    AdminMentorListResponse,
+    AdminMentorResponse,
+    AdminUserListResponse,
+    AdminUserResponse,
+    BanUserRequest,
+    DisableMentorRequest,
+)
 from app.schemas.report import (
     AdminReportListResponse,
     AdminReportResponse,
@@ -28,7 +36,11 @@ from app.services.report_service import (
     list_reports_for_admin,
     resolve_report,
 )
-from app.services.user_service import get_user_by_cognito_sub
+from app.services.user_service import (
+    get_user_by_cognito_sub,
+    list_mentors_for_admin,
+    search_users_by_email,
+)
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -217,4 +229,80 @@ async def disable_mentor_endpoint(
     return AdminActionResponse(
         success=True,
         message=f"Mentor profile for user {user_id} has been {action_word}",
+    )
+
+
+@router.get("/users/search", response_model=AdminUserListResponse)
+async def search_users(
+    admin: AdminUser,
+    db: DbSession,
+    email: str = Query(..., min_length=1, description="Email to search for"),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    include_banned: bool = Query(True, description="Include banned users in results"),
+) -> AdminUserListResponse:
+    """Search users by email (partial match, case-insensitive)."""
+    users, total = await search_users_by_email(
+        db=db,
+        email_query=email,
+        page=page,
+        page_size=page_size,
+        include_banned=include_banned,
+    )
+
+    return AdminUserListResponse(
+        users=[
+            AdminUserResponse(
+                id=u.id,
+                email=u.email,
+                display_name=u.display_name,
+                avatar_url=u.avatar_url,
+                created_at=u.created_at,
+                banned_at=u.banned_at,
+                deleted_at=u.deleted_at,
+                has_mentor_profile=u.mentor_profile is not None,
+            )
+            for u in users
+        ],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@router.get("/mentors", response_model=AdminMentorListResponse)
+async def list_mentors(
+    admin: AdminUser,
+    db: DbSession,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    enabled_only: bool = Query(False, description="Only show enabled mentors"),
+) -> AdminMentorListResponse:
+    """List all mentor profiles for admin management."""
+    mentors, total = await list_mentors_for_admin(
+        db=db,
+        page=page,
+        page_size=page_size,
+        enabled_only=enabled_only,
+    )
+
+    return AdminMentorListResponse(
+        mentors=[
+            AdminMentorResponse(
+                id=m.id,
+                user_id=m.user_id,
+                email=m.user.email,
+                display_name=m.user.display_name,
+                headline=m.headline,
+                bio=m.bio,
+                is_enabled=m.is_enabled,
+                rating_avg=m.rating_avg,
+                rating_count=m.rating_count,
+                created_at=m.created_at,
+            )
+            for m in mentors
+        ],
+        total=total,
+        page=page,
+        page_size=page_size,
     )
