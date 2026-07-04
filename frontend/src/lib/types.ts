@@ -212,3 +212,103 @@ export interface ReviewUpdate {
   rating?: number;
   comment?: string | null;
 }
+
+export type ReportStatus = "PENDING" | "UNDER_REVIEW" | "RESOLVED" | "DISMISSED";
+
+export interface ReporterBrief {
+  id: string;
+  email: string;
+  display_name: string | null;
+}
+
+export interface ReportedUserBrief {
+  id: string;
+  email: string;
+  display_name: string | null;
+}
+
+export interface ResolverBrief {
+  id: string;
+  email: string;
+  display_name: string | null;
+}
+
+export interface AdminReport {
+  id: string;
+  reporter_id: string;
+  reported_user_id: string | null;
+  reported_mentorship_id: string | null;
+  reason: string;
+  status: ReportStatus;
+  resolution_notes: string | null;
+  resolved_by_id: string | null;
+  resolved_at: string | null;
+  created_at: string;
+  updated_at: string;
+  reporter: ReporterBrief | null;
+  reported_user: ReportedUserBrief | null;
+  resolved_by: ResolverBrief | null;
+}
+
+export interface AdminReportListResponse {
+  reports: AdminReport[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface ResolveReportRequest {
+  resolution_notes: string;
+  dismiss?: boolean;
+}
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  banned_at: string | null;
+  deleted_at: string | null;
+  has_mentor_profile: boolean;
+}
+
+export interface AdminUserListResponse {
+  users: AdminUser[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface BanUserRequest {
+  reason: string;
+}
+
+export interface AdminMentor {
+  id: string;
+  user_id: string;
+  email: string;
+  display_name: string | null;
+  headline: string | null;
+  bio: string | null;
+  is_enabled: boolean;
+  rating_avg: number | null;
+  rating_count: number;
+  created_at: string;
+}
+
+export interface AdminMentorListResponse {
+  mentors: AdminMentor[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface DisableMentorRequest {
+  reason: string;
+}
+
+export interface AdminActionResponse {
+  success: boolean;
+  message: string;
+}
