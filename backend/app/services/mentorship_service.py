@@ -102,38 +102,59 @@ async def create_mentorship(
     if mentor_profile.scalar_one_or_none() is None:
         raise MentorNotFoundError("Mentor not found or not accepting requests")
 
-    # Only block if there's an active or pending mentorship
-    existing = await db.execute(
+    # Check for any existing mentorship between these users
+    existing_result = await db.execute(
         select(Mentorship).where(
             Mentorship.mentor_id == mentor_id,
             Mentorship.mentee_id == mentee.id,
-            Mentorship.status.in_(
-                [MentorshipStatus.REQUESTED, MentorshipStatus.ACTIVE]
-            ),
         )
     )
-    if existing.scalar_one_or_none() is not None:
-        raise DuplicateMentorshipError("Mentorship already exists with this mentor")
+    existing = existing_result.scalar_one_or_none()
 
-    mentorship = Mentorship(
-        mentor_id=mentor_id,
-        mentee_id=mentee.id,
-        status=MentorshipStatus.REQUESTED,
-    )
-    db.add(mentorship)
-    await db.flush()
+    if existing is not None:
+        # Block if already active or pending
+        if existing.status in (MentorshipStatus.REQUESTED, MentorshipStatus.ACTIVE):
+            raise DuplicateMentorshipError("Mentorship already exists with this mentor")
 
-    thread = MessageThread(mentorship_id=mentorship.id)
-    db.add(thread)
-    await db.flush()
+        # Reactivate ended/declined mentorship
+        existing.status = MentorshipStatus.REQUESTED
+        mentorship = existing
+        await db.flush()
 
-    system_message = Message(
-        thread_id=thread.id,
-        sender_id=None,
-        content="Mentorship request created.",
-        is_system=True,
-    )
-    db.add(system_message)
+        # Get existing thread and add system message
+        thread_result = await db.execute(
+            select(MessageThread).where(MessageThread.mentorship_id == mentorship.id)
+        )
+        thread = thread_result.scalar_one_or_none()
+        if thread:
+            system_message = Message(
+                thread_id=thread.id,
+                sender_id=None,
+                content="Mentorship request renewed.",
+                is_system=True,
+            )
+            db.add(system_message)
+    else:
+        # Create new mentorship
+        mentorship = Mentorship(
+            mentor_id=mentor_id,
+            mentee_id=mentee.id,
+            status=MentorshipStatus.REQUESTED,
+        )
+        db.add(mentorship)
+        await db.flush()
+
+        thread = MessageThread(mentorship_id=mentorship.id)
+        db.add(thread)
+        await db.flush()
+
+        system_message = Message(
+            thread_id=thread.id,
+            sender_id=None,
+            content="Mentorship request created.",
+            is_system=True,
+        )
+        db.add(system_message)
 
     await db.commit()
     await db.refresh(mentorship)
