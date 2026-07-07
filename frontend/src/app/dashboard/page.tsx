@@ -121,17 +121,17 @@ export default function DashboardPage() {
     router.push("/");
   };
 
-  const mentorshipsAsMentee = mentorshipsData?.items.filter(
+  const mentorshipsAsMentee = mentorshipsData?.items?.filter(
     (m) => m.mentee_id === user?.id
   ) ?? [];
 
-  const mentorshipsAsMentor = mentorshipsData?.items.filter(
+  const mentorshipsAsMentor = mentorshipsData?.items?.filter(
     (m) => m.mentor_id === user?.id
   ) ?? [];
 
   const activeMentorships = activeTab === "mentee" ? mentorshipsAsMentee : mentorshipsAsMentor;
 
-  const upcomingMeetings = meetingsData?.items.filter(
+  const upcomingMeetings = meetingsData?.items?.filter(
     (m) => m.status === "SCHEDULED" || m.status === "REQUESTED"
   ) ?? [];
 
