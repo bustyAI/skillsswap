@@ -7,7 +7,8 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 COPY pyproject.toml README.md ./
 
-# install dependencies
+# Install dependencies with CPU-only PyTorch (saves ~2GB, no GPU on EC2 t3.small)
+ENV UV_EXTRA_INDEX_URL=https://download.pytorch.org/whl/cpu
 RUN uv sync --no-dev --no-install-project
 
 # copy code
