@@ -46,15 +46,29 @@ async def get_topic_by_id(db: AsyncSession, topic_id: UUID) -> Topic | None:
     return result.scalar_one_or_none()
 
 
+class MentorWithUser:
+    """Combined mentor profile with user info for topic listings."""
+
+    def __init__(self, mentor: MentorProfile, user: User) -> None:
+        self.id = mentor.id
+        self.user_id = mentor.user_id
+        self.display_name = user.display_name
+        self.avatar_url = user.avatar_url
+        self.headline = mentor.headline
+        self.bio = mentor.bio
+        self.rating_avg = mentor.rating_avg
+        self.rating_count = mentor.rating_count
+
+
 async def get_mentors_for_topic(
     db: AsyncSession,
     topic_id: UUID,
     page: int = 1,
     page_size: int = 20,
-) -> tuple[list[MentorProfile], int]:
+) -> tuple[list[MentorWithUser], int]:
     """Get mentors who have this topic, ordered by rating_avg DESC."""
     base_query = (
-        select(MentorProfile)
+        select(MentorProfile, User)
         .join(MentorTopic, MentorProfile.id == MentorTopic.mentor_profile_id)
         .join(User, MentorProfile.user_id == User.id)
         .where(
@@ -64,7 +78,17 @@ async def get_mentors_for_topic(
         )
     )
 
-    count_query = select(func.count()).select_from(base_query.subquery())
+    count_query = select(func.count()).select_from(
+        select(MentorProfile.id)
+        .join(MentorTopic, MentorProfile.id == MentorTopic.mentor_profile_id)
+        .join(User, MentorProfile.user_id == User.id)
+        .where(
+            MentorTopic.topic_id == topic_id,
+            MentorProfile.is_enabled.is_(True),
+            User.deleted_at.is_(None),
+        )
+        .subquery()
+    )
     total_result = await db.execute(count_query)
     total = total_result.scalar() or 0
 
@@ -79,7 +103,7 @@ async def get_mentors_for_topic(
     )
 
     result = await db.execute(query)
-    mentors = list(result.scalars().all())
+    mentors = [MentorWithUser(row[0], row[1]) for row in result.all()]
 
     return mentors, total
 

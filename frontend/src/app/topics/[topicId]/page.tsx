@@ -125,14 +125,17 @@ export default function TopicPage({ params }: PageProps) {
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
-                        {recMentor && (
-                          <p className="font-medium text-zinc-900 dark:text-zinc-100">
-                            {recMentor.display_name || "Anonymous"}
-                          </p>
-                        )}
+                        <p className="font-medium text-zinc-900 dark:text-zinc-100">
+                          {mentor.display_name || "Anonymous"}
+                        </p>
                         {mentor.headline && (
                           <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
                             {mentor.headline}
+                          </p>
+                        )}
+                        {mentor.bio && (
+                          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2 line-clamp-2">
+                            {mentor.bio}
                           </p>
                         )}
                         <div className="mt-2 text-sm">

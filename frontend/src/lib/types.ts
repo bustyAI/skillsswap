@@ -23,7 +23,10 @@ export interface TopicBrief {
 export interface MentorBrief {
   id: string;
   user_id: string;
+  display_name: string | null;
+  avatar_url: string | null;
   headline: string | null;
+  bio: string | null;
   rating_avg: number | null;
   rating_count: number;
 }

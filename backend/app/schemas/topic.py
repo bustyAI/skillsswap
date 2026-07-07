@@ -37,7 +37,10 @@ class MentorBriefResponse(BaseModel):
 
     id: UUID
     user_id: UUID
+    display_name: str | None = None
+    avatar_url: str | None = None
     headline: str | None = None
+    bio: str | None = None
     rating_avg: Decimal | None = None
     rating_count: int
 
