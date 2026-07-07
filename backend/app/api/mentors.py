@@ -223,6 +223,27 @@ async def get_mentor_by_user_id(
     return MentorProfileResponse.model_validate(mentor_profile)
 
 
+@router.get("/{user_id}/topics", response_model=MentorTopicsResponse)
+async def get_mentor_topics_by_user_id(
+    user_id: UUID,
+    db: DbSession,
+) -> MentorTopicsResponse:
+    """Get a mentor's topic list by user ID.
+
+    This is a public endpoint - no authentication required.
+    Returns 404 if the user doesn't have a mentor profile.
+    """
+    mentor_profile = await get_mentor_profile_by_user_id(db, user_id)
+    if mentor_profile is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Mentor profile not found",
+        )
+
+    topics = await get_mentor_topics(db, mentor_profile)
+    return MentorTopicsResponse(topics=[TopicBrief.model_validate(t) for t in topics])
+
+
 def _build_review_response(review) -> ReviewResponse:  # type: ignore[no-untyped-def]
     return ReviewResponse(
         id=review.id,
