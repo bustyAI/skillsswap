@@ -102,10 +102,14 @@ async def create_mentorship(
     if mentor_profile.scalar_one_or_none() is None:
         raise MentorNotFoundError("Mentor not found or not accepting requests")
 
+    # Only block if there's an active or pending mentorship
     existing = await db.execute(
         select(Mentorship).where(
             Mentorship.mentor_id == mentor_id,
             Mentorship.mentee_id == mentee.id,
+            Mentorship.status.in_(
+                [MentorshipStatus.REQUESTED, MentorshipStatus.ACTIVE]
+            ),
         )
     )
     if existing.scalar_one_or_none() is not None:

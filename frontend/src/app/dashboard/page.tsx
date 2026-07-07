@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/providers/auth-provider";
 import { useUser } from "@/hooks/use-user";
 import { useMyMentorships } from "@/hooks/use-mentorship";
@@ -103,6 +104,7 @@ function MeetingCard({ meeting }: { meeting: Meeting }) {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { signOut } = useAuth();
   const { user, isLoading: userLoading } = useUser();
   const { data: mentorshipsData, isLoading: mentorshipsLoading } = useMyMentorships();
@@ -117,6 +119,7 @@ export default function DashboardPage() {
   );
 
   const handleSignOut = () => {
+    queryClient.clear();
     signOut();
     router.push("/");
   };

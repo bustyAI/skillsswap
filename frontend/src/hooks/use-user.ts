@@ -33,6 +33,9 @@ export function useUpdateUser() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user", "me"] });
+      // Also invalidate queries that contain user data
+      queryClient.invalidateQueries({ queryKey: ["mentorships"] });
+      queryClient.invalidateQueries({ queryKey: ["meetings"] });
     },
   });
 }
