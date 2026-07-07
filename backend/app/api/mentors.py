@@ -31,17 +31,32 @@ from app.services.user_service import get_or_create_user
 router = APIRouter(prefix="/mentors", tags=["mentors"])
 
 
-@router.get("/{user_id}", response_model=MentorProfileResponse)
-async def get_mentor_by_user_id(
-    user_id: UUID,
+# NOTE: /me routes MUST be defined before /{user_id} routes
+# otherwise FastAPI will try to parse "me" as a UUID
+
+
+@router.get("/me", response_model=MentorProfileResponse)
+async def get_my_mentor_profile(
+    current_user: Annotated[TokenClaims, Depends(get_current_user)],
     db: DbSession,
 ) -> MentorProfileResponse:
-    """Get a mentor profile by user ID.
+    """Get the current user's mentor profile.
 
-    This is a public endpoint - no authentication required.
-    Returns 404 if the user doesn't have a mentor profile or is deleted.
+    Returns 404 if the user doesn't have a mentor profile.
     """
-    mentor_profile = await get_mentor_profile_by_user_id(db, user_id)
+    if not current_user.username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Token missing username claim",
+        )
+
+    user = await get_or_create_user(
+        db=db,
+        cognito_sub=current_user.sub,
+        email=current_user.username,
+    )
+
+    mentor_profile = await get_mentor_profile_by_user_id(db, user.id)
     if mentor_profile is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -184,6 +199,28 @@ async def replace_my_mentor_topics(
 
     topics = await replace_mentor_topics(db, mentor_profile, data.topic_ids)
     return MentorTopicsResponse(topics=[TopicBrief.model_validate(t) for t in topics])
+
+
+# /{user_id} routes MUST come after /me routes
+
+
+@router.get("/{user_id}", response_model=MentorProfileResponse)
+async def get_mentor_by_user_id(
+    user_id: UUID,
+    db: DbSession,
+) -> MentorProfileResponse:
+    """Get a mentor profile by user ID.
+
+    This is a public endpoint - no authentication required.
+    Returns 404 if the user doesn't have a mentor profile or is deleted.
+    """
+    mentor_profile = await get_mentor_profile_by_user_id(db, user_id)
+    if mentor_profile is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Mentor profile not found",
+        )
+    return MentorProfileResponse.model_validate(mentor_profile)
 
 
 def _build_review_response(review) -> ReviewResponse:  # type: ignore[no-untyped-def]
