@@ -366,7 +366,7 @@ function MessageBubble({
             {message.sender?.display_name || message.sender?.email || "Unknown"}
           </p>
         )}
-        <p className="whitespace-pre-wrap break-words">{message.body}</p>
+        <p className="whitespace-pre-wrap break-words">{message.content}</p>
         <p
           className={`text-xs mt-1 ${
             isOwnMessage ? "text-zinc-300 dark:text-zinc-600" : "text-zinc-500"
@@ -396,7 +396,7 @@ function MessageThread({
     polling: isActive,
   });
 
-  const messages = messagesData?.items ?? [];
+  const messages = messagesData?.messages ?? [];
   const sortedMessages = [...messages].reverse();
 
   useEffect(() => {

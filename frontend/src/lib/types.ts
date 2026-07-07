@@ -180,16 +180,16 @@ export interface Message {
   id: string;
   thread_id: string;
   sender_id: string;
-  body: string;
+  content: string;
+  is_system: boolean;
   created_at: string;
   sender: UserBrief | null;
 }
 
 export interface MessageListResponse {
-  items: Message[];
-  total: number;
-  has_next: boolean;
-  cursor: string | null;
+  messages: Message[];
+  has_more: boolean;
+  next_cursor: string | null;
 }
 
 export interface MessageCreate {
