@@ -14,14 +14,18 @@ interface PageProps {
 
 function StarRating({ rating, size = "md" }: { rating: number | null; size?: "sm" | "md" }) {
   const textSize = size === "sm" ? "text-sm" : "text-lg";
-  if (rating === null) {
+  if (rating === null || rating === undefined) {
+    return <span className={`text-zinc-400 ${textSize}`}>No ratings yet</span>;
+  }
+  const numRating = Number(rating);
+  if (isNaN(numRating)) {
     return <span className={`text-zinc-400 ${textSize}`}>No ratings yet</span>;
   }
   return (
     <span className={`text-zinc-600 dark:text-zinc-400 ${textSize}`}>
-      {"★".repeat(Math.round(rating))}
-      {"☆".repeat(5 - Math.round(rating))}
-      <span className="ml-1">{rating.toFixed(1)}</span>
+      {"★".repeat(Math.round(numRating))}
+      {"☆".repeat(5 - Math.round(numRating))}
+      <span className="ml-1">{numRating.toFixed(1)}</span>
     </span>
   );
 }

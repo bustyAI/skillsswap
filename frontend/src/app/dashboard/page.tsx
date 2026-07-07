@@ -319,8 +319,8 @@ export default function DashboardPage() {
                       )}
                       <div className="flex items-center justify-between mt-2">
                         <span className="text-xs text-zinc-400">
-                          {mentor.rating_avg
-                            ? `★ ${mentor.rating_avg.toFixed(1)}`
+                          {mentor.rating_avg != null
+                            ? `★ ${Number(mentor.rating_avg).toFixed(1)}`
                             : "No ratings"}
                         </span>
                         <span className="text-xs px-2 py-0.5 bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 rounded">
