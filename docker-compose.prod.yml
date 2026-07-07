@@ -54,6 +54,22 @@ services:
     # No volume mount - production runs baked-in code, not hot reload
     # No --reload flag - using Dockerfile's default CMD
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+        - NEXT_PUBLIC_COGNITO_REGION=${COGNITO_REGION}
+        - NEXT_PUBLIC_COGNITO_USER_POOL_ID=${COGNITO_USER_POOL_ID}
+        - NEXT_PUBLIC_COGNITO_APP_CLIENT_ID=${COGNITO_APP_CLIENT_ID}
+    container_name: skillswap-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   redis_data:
