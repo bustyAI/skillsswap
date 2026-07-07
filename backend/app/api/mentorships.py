@@ -10,7 +10,11 @@ from app.core.auth import get_current_user
 from app.db.dependencies import DbSession
 from app.db.models.mentorship import MentorshipStatus
 from app.schemas.auth import TokenClaims
-from app.schemas.meeting import MeetingResponse
+from app.schemas.meeting import (
+    MeetingListResponse,
+    MeetingResponse,
+    MeetingWithUsersResponse,
+)
 from app.schemas.mentorship import (
     MentorshipCreate,
     MentorshipListResponse,
@@ -27,6 +31,7 @@ from app.services.meeting_service import (
     MentorshipNotActiveError,
     OnlyMenteeCanRequestError,
     create_meeting,
+    list_mentorship_meetings,
 )
 from app.services.mentorship_service import (
     DuplicateMentorshipError,
@@ -327,6 +332,66 @@ def _build_meeting_response(meeting) -> MeetingResponse:  # type: ignore[no-unty
         status=meeting.status,
         created_at=meeting.created_at,
         updated_at=meeting.updated_at,
+    )
+
+
+def _build_meeting_response_with_users(meeting) -> MeetingWithUsersResponse:  # type: ignore[no-untyped-def]
+    mentorship = meeting.mentorship
+    return MeetingWithUsersResponse(
+        id=meeting.id,
+        mentorship_id=meeting.mentorship_id,
+        scheduled_time=meeting.scheduled_time,
+        meeting_url=meeting.meeting_url,
+        status=meeting.status,
+        created_at=meeting.created_at,
+        updated_at=meeting.updated_at,
+        mentor=UserBrief.model_validate(mentorship.mentor)
+        if mentorship and mentorship.mentor
+        else None,
+        mentee=UserBrief.model_validate(mentorship.mentee)
+        if mentorship and mentorship.mentee
+        else None,
+    )
+
+
+@router.get("/{mentorship_id}/meetings", response_model=MeetingListResponse)
+async def get_mentorship_meetings(
+    mentorship_id: UUID,
+    current_user: Annotated[TokenClaims, Depends(get_current_user)],
+    db: DbSession,
+) -> MeetingListResponse:
+    """Get all meetings for a mentorship.
+
+    Only accessible by parties to the mentorship.
+    """
+    if not current_user.username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Token missing username claim",
+        )
+
+    user = await get_or_create_user(
+        db=db,
+        cognito_sub=current_user.sub,
+        email=current_user.username,
+    )
+
+    mentorship = await get_mentorship_by_id(db, mentorship_id, include_users=True)
+    if mentorship is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Mentorship not found",
+        )
+
+    if user.id not in (mentorship.mentor_id, mentorship.mentee_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not a party to this mentorship",
+        )
+
+    meetings = await list_mentorship_meetings(db, mentorship_id)
+    return MeetingListResponse(
+        meetings=[_build_meeting_response_with_users(m) for m in meetings],
     )
 
 

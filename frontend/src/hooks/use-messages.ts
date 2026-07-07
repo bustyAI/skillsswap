@@ -23,7 +23,7 @@ export function useSendMessage() {
     mutationFn: async ({ mentorshipId, body }: SendMessageParams) => {
       return apiFetch<Message>(`/mentorships/${mentorshipId}/messages`, {
         method: "POST",
-        body: JSON.stringify({ body }),
+        body: JSON.stringify({ content: body }),
       });
     },
     onSuccess: (_data, variables) => {

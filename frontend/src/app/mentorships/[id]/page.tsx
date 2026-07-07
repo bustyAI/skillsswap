@@ -284,7 +284,7 @@ function MeetingsSection({
   const requestMeeting = useRequestMeeting();
   const [requestError, setRequestError] = useState<string | null>(null);
 
-  const meetings = meetingsData?.items ?? [];
+  const meetings = meetingsData?.meetings ?? [];
 
   const handleRequestMeeting = async () => {
     setRequestError(null);

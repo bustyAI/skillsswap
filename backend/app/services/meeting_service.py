@@ -240,3 +240,22 @@ async def list_user_meetings(
 
     result = await db.execute(query)
     return list(result.scalars().all())
+
+
+async def list_mentorship_meetings(
+    db: AsyncSession,
+    mentorship_id: UUID,
+) -> list[Meeting]:
+    """List all meetings for a specific mentorship."""
+    query = (
+        select(Meeting)
+        .where(Meeting.mentorship_id == mentorship_id)
+        .options(
+            selectinload(Meeting.mentorship).selectinload(Mentorship.mentor),
+            selectinload(Meeting.mentorship).selectinload(Mentorship.mentee),
+        )
+        .order_by(Meeting.scheduled_time.asc().nulls_last(), Meeting.created_at.desc())
+    )
+
+    result = await db.execute(query)
+    return list(result.scalars().all())

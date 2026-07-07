@@ -147,8 +147,7 @@ export interface Meeting {
 }
 
 export interface MeetingListResponse {
-  items: Meeting[];
-  total: number;
+  meetings: Meeting[];
 }
 
 export interface MyMentorProfile {

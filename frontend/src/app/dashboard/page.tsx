@@ -131,7 +131,7 @@ export default function DashboardPage() {
 
   const activeMentorships = activeTab === "mentee" ? mentorshipsAsMentee : mentorshipsAsMentor;
 
-  const upcomingMeetings = meetingsData?.items?.filter(
+  const upcomingMeetings = meetingsData?.meetings?.filter(
     (m) => m.status === "SCHEDULED" || m.status === "REQUESTED"
   ) ?? [];
 
