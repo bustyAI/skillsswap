@@ -118,8 +118,7 @@ export interface Mentorship {
 }
 
 export interface MentorshipListResponse {
-  items: Mentorship[];
-  total: number;
+  mentorships: Mentorship[];
 }
 
 export interface User {
