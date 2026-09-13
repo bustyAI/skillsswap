@@ -44,23 +44,23 @@ export default function SignUpPage() {
   return (
     <main className="flex flex-1 items-center justify-center px-6 py-12">
       <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
+        <div className="text-center mb-10">
           <Link href="/" className="inline-block">
             <span className="font-display text-2xl font-bold text-ink">SkillSwap</span>
           </Link>
-          <h1 className="mt-8 font-display text-2xl text-ink">Create your account</h1>
-          <p className="mt-2 text-ink-muted">Start your learning journey today</p>
+          <h1 className="mt-8 font-display text-3xl text-ink">Create your account</h1>
+          <p className="mt-2 text-ink-muted font-medium">Start your learning journey today</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {error && (
-            <div className="p-3 text-sm text-error bg-error-light rounded-lg">
+            <div className="p-4 text-sm font-medium text-error bg-error-light rounded-lg border-[3px] border-error/20">
               {error}
             </div>
           )}
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-ink mb-1.5">
+            <label htmlFor="email" className="block text-sm font-bold text-ink mb-2">
               Email address
             </label>
             <input
@@ -76,7 +76,7 @@ export default function SignUpPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-ink mb-1.5">
+            <label htmlFor="password" className="block text-sm font-bold text-ink mb-2">
               Password
             </label>
             <input
@@ -92,7 +92,7 @@ export default function SignUpPage() {
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-ink mb-1.5">
+            <label htmlFor="confirmPassword" className="block text-sm font-bold text-ink mb-2">
               Confirm password
             </label>
             <input
@@ -112,9 +112,9 @@ export default function SignUpPage() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-ink-muted">
+        <p className="mt-8 text-center text-sm text-ink-muted">
           Already have an account?{" "}
-          <Link href="/auth/signin" className="font-medium text-terracotta hover:text-terracotta-dark">
+          <Link href="/auth/signin" className="font-bold text-terracotta hover:text-terracotta-dark">
             Sign in
           </Link>
         </p>

@@ -74,30 +74,30 @@ export default function TopicPage({ params }: PageProps) {
       <div className="max-w-4xl mx-auto w-full">
         <Link
           href="/"
-          className="text-sm text-ink-muted hover:text-ink mb-6 inline-block"
+          className="text-sm font-bold text-ink-muted hover:text-terracotta mb-6 inline-block"
         >
           ← All Topics
         </Link>
 
-        <h1 className="font-display text-3xl text-ink">{topic.name}</h1>
+        <h1 className="font-display text-4xl text-ink">{topic.name}</h1>
         {topic.description && (
-          <p className="mt-2 text-ink-muted text-lg">{topic.description}</p>
+          <p className="mt-3 text-ink-muted text-lg leading-relaxed">{topic.description}</p>
         )}
 
-        <section className="mt-10">
-          <div className="flex items-center justify-between mb-6">
+        <section className="mt-12">
+          <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
-              <h2 className="font-display text-xl text-ink">
+              <h2 className="font-display text-2xl text-ink">
                 {useRecs ? "Recommended Mentors" : "Mentors"}
               </h2>
-              <div className="flex-1 h-px bg-cream-dark min-w-[2rem]" />
+              <div className="flex-1 h-[3px] bg-ink min-w-[2rem]" />
             </div>
             {!isAuthenticated && !authLoading && (
               <Link
                 href="/auth/signin"
-                className="text-sm text-terracotta hover:text-terracotta-dark"
+                className="text-sm font-bold text-terracotta hover:text-terracotta-dark"
               >
-                Sign in for personalized recommendations
+                Sign in for recommendations
               </Link>
             )}
           </div>
@@ -111,7 +111,7 @@ export default function TopicPage({ params }: PageProps) {
           ) : mentorError ? (
             <p className="text-error">Failed to load mentors</p>
           ) : mentorData && mentorData.length > 0 ? (
-            <div className="grid gap-4">
+            <div className="grid gap-5">
               {mentorData.map((mentor: RecommendedMentor | MentorBrief) => {
                 const isRecommended = "score" in mentor;
                 const recMentor = isRecommended ? (mentor as RecommendedMentor) : null;
@@ -119,26 +119,26 @@ export default function TopicPage({ params }: PageProps) {
                   <Link
                     key={mentor.id}
                     href={`/mentors/${mentor.user_id}`}
-                    className="block p-5 bg-white border-2 border-cream-dark rounded-lg hover:border-olive transition-colors"
+                    className="block p-6 bg-white border-[3px] border-cream-dark rounded-lg hover:border-ink transition-colors"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-ink">
+                        <p className="font-bold text-lg text-ink">
                           {mentor.display_name || "Anonymous"}
                         </p>
                         {mentor.headline && (
-                          <p className="text-sm text-ink-muted mt-1">{mentor.headline}</p>
+                          <p className="text-ink-muted mt-1 font-medium">{mentor.headline}</p>
                         )}
                         {mentor.bio && (
-                          <p className="text-sm text-ink-faint mt-2 line-clamp-2">{mentor.bio}</p>
+                          <p className="text-ink-faint mt-2 line-clamp-2">{mentor.bio}</p>
                         )}
-                        <div className="mt-3 flex items-center gap-3 text-sm">
+                        <div className="mt-4 flex items-center gap-3 text-sm">
                           <StarRating rating={mentor.rating_avg} />
-                          <span className="text-ink-faint">({mentor.rating_count} reviews)</span>
+                          <span className="text-ink-faint font-medium">({mentor.rating_count} reviews)</span>
                         </div>
                       </div>
                       {recMentor && (
-                        <span className="text-xs font-medium px-2 py-1 bg-olive-light text-olive-dark rounded">
+                        <span className="text-xs font-bold uppercase tracking-wide px-3 py-1.5 bg-olive text-white rounded">
                           {Math.round(recMentor.score * 100)}% match
                         </span>
                       )}
@@ -148,8 +148,8 @@ export default function TopicPage({ params }: PageProps) {
               })}
             </div>
           ) : (
-            <div className="text-center py-12 bg-white border-2 border-cream-dark rounded-lg">
-              <p className="text-ink-muted">No mentors available for this topic yet</p>
+            <div className="text-center py-12 bg-white border-[3px] border-cream-dark rounded-lg">
+              <p className="text-ink-muted font-medium">No mentors available for this topic yet</p>
             </div>
           )}
         </section>

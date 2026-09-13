@@ -38,16 +38,16 @@ function MentorshipCard({ mentorship, role }: { mentorship: Mentorship; role: Me
   return (
     <Link
       href={`/mentorships/${mentorship.id}`}
-      className="block p-4 bg-white border-2 border-cream-dark rounded-lg hover:border-terracotta transition-colors"
+      className="block p-5 bg-white border-[3px] border-cream-dark rounded-lg hover:border-ink transition-colors"
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="font-medium text-ink">
+          <p className="font-bold text-ink">
             {otherParty?.display_name || otherParty?.email || "Unknown"}
           </p>
-          <p className="text-sm text-ink-muted">{otherPartyLabel}</p>
+          <p className="text-sm text-ink-muted font-medium">{otherPartyLabel}</p>
         </div>
-        <span className={`text-xs font-medium px-2 py-1 rounded ${statusClass}`}>
+        <span className={`text-xs font-bold uppercase tracking-wide px-3 py-1.5 rounded ${statusClass}`}>
           {mentorship.status}
         </span>
       </div>
@@ -60,19 +60,19 @@ function MeetingCard({ meeting }: { meeting: Meeting }) {
   const statusClass = statusColors[meeting.status as keyof typeof statusColors] || statusColors.DEFAULT;
 
   return (
-    <div className="p-4 bg-white border-2 border-cream-dark rounded-lg">
+    <div className="p-5 bg-white border-[3px] border-cream-dark rounded-lg">
       <div className="flex items-center justify-between">
         <div>
           {meeting.scheduled_time && (
-            <p className="font-medium text-ink">{formatDateTime(meeting.scheduled_time)}</p>
+            <p className="font-bold text-ink">{formatDateTime(meeting.scheduled_time)}</p>
           )}
           {otherParty && (
-            <p className="text-sm text-ink-muted">
+            <p className="text-sm text-ink-muted font-medium">
               with {otherParty.display_name || otherParty.email}
             </p>
           )}
         </div>
-        <span className={`text-xs font-medium px-2 py-1 rounded ${statusClass}`}>
+        <span className={`text-xs font-bold uppercase tracking-wide px-3 py-1.5 rounded ${statusClass}`}>
           {meeting.status}
         </span>
       </div>
@@ -81,9 +81,9 @@ function MeetingCard({ meeting }: { meeting: Meeting }) {
           href={meeting.meeting_url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-block mt-3 text-sm font-medium text-terracotta hover:text-terracotta-dark"
+          className="inline-flex items-center gap-1 mt-4 px-4 py-2 text-sm font-bold uppercase tracking-wide bg-teal text-white rounded hover:bg-teal-dark transition-colors"
         >
-          Join Meeting →
+          Join Meeting
         </a>
       )}
     </div>
@@ -136,7 +136,7 @@ export default function DashboardPage() {
 
   return (
     <main className="flex flex-1 flex-col">
-      <header className="border-b border-cream-dark bg-white">
+      <header className="border-b-[3px] border-ink bg-white">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="font-display text-xl font-bold text-ink">
             SkillSwap
@@ -144,19 +144,19 @@ export default function DashboardPage() {
           <nav className="flex items-center gap-6">
             <Link
               href="/dashboard/profile"
-              className="text-sm text-ink-muted hover:text-ink transition-colors"
+              className="text-sm font-semibold text-ink-muted hover:text-terracotta transition-colors"
             >
               Profile
             </Link>
             <Link
               href="/dashboard/mentor-profile"
-              className="text-sm text-ink-muted hover:text-ink transition-colors"
+              className="text-sm font-semibold text-ink-muted hover:text-terracotta transition-colors"
             >
               Mentor Profile
             </Link>
             <button
               onClick={handleSignOut}
-              className="text-sm text-ink-muted hover:text-ink transition-colors"
+              className="text-sm font-semibold text-ink-muted hover:text-terracotta transition-colors"
             >
               Sign out
             </button>
@@ -164,41 +164,41 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <div className="flex-1 max-w-5xl mx-auto w-full px-6 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="font-display text-2xl text-ink">Dashboard</h1>
+      <div className="flex-1 max-w-5xl mx-auto w-full px-6 py-10">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-10">
+          <h1 className="font-display text-3xl text-ink">Dashboard</h1>
           {user && (
-            <p className="text-sm text-ink-muted">
-              Welcome, {user.display_name || user.email}
+            <p className="text-sm font-medium text-ink-muted truncate">
+              Welcome, <span className="text-ink font-bold">{user.display_name || user.email}</span>
             </p>
           )}
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-8">
+        <div className="grid gap-10 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-10">
             <section>
-              <div className="flex items-center gap-4 mb-4">
-                <h2 className="font-display text-lg text-ink">My Mentorships</h2>
-                <div className="flex-1 h-px bg-cream-dark" />
+              <div className="flex items-center gap-4 mb-6">
+                <h2 className="font-display text-xl text-ink">My Mentorships</h2>
+                <div className="flex-1 h-[3px] bg-ink" />
               </div>
 
-              <div className="flex gap-2 mb-4">
+              <div className="flex gap-2 mb-5">
                 <button
                   onClick={() => setActiveTab("mentee")}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  className={`px-5 py-2.5 text-sm font-bold uppercase tracking-wide rounded-lg transition-colors ${
                     activeTab === "mentee"
-                      ? "bg-terracotta text-white"
-                      : "bg-cream-dark text-ink-muted hover:text-ink"
+                      ? "bg-terracotta text-white shadow-[0_2px_0_var(--terracotta-dark)]"
+                      : "bg-cream-dark text-ink-muted hover:text-ink border-[3px] border-transparent"
                   }`}
                 >
                   As Mentee ({mentorshipsAsMentee.length})
                 </button>
                 <button
                   onClick={() => setActiveTab("mentor")}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  className={`px-5 py-2.5 text-sm font-bold uppercase tracking-wide rounded-lg transition-colors ${
                     activeTab === "mentor"
-                      ? "bg-terracotta text-white"
-                      : "bg-cream-dark text-ink-muted hover:text-ink"
+                      ? "bg-terracotta text-white shadow-[0_2px_0_var(--terracotta-dark)]"
+                      : "bg-cream-dark text-ink-muted hover:text-ink border-[3px] border-transparent"
                   }`}
                 >
                   As Mentor ({mentorshipsAsMentor.length})
@@ -212,14 +212,14 @@ export default function DashboardPage() {
                   ))}
                 </div>
               ) : activeMentorships.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {activeMentorships.map((mentorship) => (
                     <MentorshipCard key={mentorship.id} mentorship={mentorship} role={activeTab} />
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 bg-white border-2 border-cream-dark rounded-lg">
-                  <p className="text-ink-muted">
+                <div className="text-center py-10 bg-white border-[3px] border-cream-dark rounded-lg">
+                  <p className="text-ink-muted font-medium">
                     {activeTab === "mentee"
                       ? "You have no mentorships as a mentee yet."
                       : "You have no mentorships as a mentor yet."}
@@ -227,9 +227,9 @@ export default function DashboardPage() {
                   {activeTab === "mentee" && (
                     <Link
                       href="/"
-                      className="inline-block mt-3 text-sm font-medium text-terracotta hover:text-terracotta-dark"
+                      className="inline-block mt-4 px-5 py-2 text-sm font-bold uppercase tracking-wide bg-terracotta text-white rounded hover:bg-terracotta-dark transition-colors"
                     >
-                      Browse topics to find a mentor →
+                      Find a Mentor
                     </Link>
                   )}
                 </div>
@@ -237,81 +237,78 @@ export default function DashboardPage() {
             </section>
 
             <section>
-              <div className="flex items-center gap-4 mb-4">
-                <h2 className="font-display text-lg text-ink">Upcoming Meetings</h2>
-                <div className="flex-1 h-px bg-cream-dark" />
+              <div className="flex items-center gap-4 mb-6">
+                <h2 className="font-display text-xl text-ink">Upcoming Meetings</h2>
+                <div className="flex-1 h-[3px] bg-ink" />
               </div>
 
               {meetingsLoading ? (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {Array.from({ length: 2 }).map((_, i) => (
-                    <div key={i} className="h-20 bg-cream-dark rounded-lg animate-pulse" />
+                    <div key={i} className="h-24 bg-cream-dark rounded-lg animate-pulse" />
                   ))}
                 </div>
               ) : upcomingMeetings.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {upcomingMeetings.map((meeting) => (
                     <MeetingCard key={meeting.id} meeting={meeting} />
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 bg-white border-2 border-cream-dark rounded-lg">
-                  <p className="text-ink-muted">No upcoming meetings</p>
+                <div className="text-center py-10 bg-white border-[3px] border-cream-dark rounded-lg">
+                  <p className="text-ink-muted font-medium">No upcoming meetings</p>
                 </div>
               )}
             </section>
           </div>
 
-          <div>
-            <section>
-              <div className="flex items-center gap-4 mb-4">
-                <h2 className="font-display text-lg text-ink">Recommended</h2>
-                <div className="flex-1 h-px bg-cream-dark" />
-              </div>
+          <div className="min-w-0">
+            <section className="bg-golden-light p-4 rounded-lg border-[3px] border-golden">
+              <h2 className="font-display text-sm text-golden-dark text-center mb-3">Recommended</h2>
 
               {recommendationsLoading ? (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="h-20 bg-cream-dark rounded-lg animate-pulse" />
+                    <div key={i} className="h-20 bg-white/50 rounded animate-pulse" />
                   ))}
                 </div>
               ) : recommendationsData && recommendationsData.items.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {recommendationsData.items.slice(0, 5).map((mentor) => (
                     <Link
                       key={mentor.id}
                       href={`/mentors/${mentor.user_id}`}
-                      className="block p-4 bg-white border-2 border-cream-dark rounded-lg hover:border-olive transition-colors"
+                      className="block p-3 bg-white border-2 border-golden/30 rounded hover:border-golden-dark transition-colors"
                     >
-                      <p className="font-medium text-ink text-sm">
+                      <p className="font-bold text-ink text-xs truncate">
                         {mentor.display_name || "Anonymous"}
                       </p>
                       {mentor.headline && (
-                        <p className="text-xs text-ink-muted mt-1 line-clamp-2">
+                        <p className="text-xs text-ink-muted mt-1 line-clamp-1">
                           {mentor.headline}
                         </p>
                       )}
                       <div className="flex items-center justify-between mt-2">
-                        <span className="text-xs text-golden-dark">
+                        <span className="text-xs font-bold text-golden-dark">
                           {mentor.rating_avg != null
                             ? `★ ${Number(mentor.rating_avg).toFixed(1)}`
-                            : "New mentor"}
+                            : "New"}
                         </span>
-                        <span className="text-xs px-2 py-0.5 bg-olive-light text-olive-dark rounded">
-                          {Math.round(mentor.score * 100)}% match
+                        <span className="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 bg-olive text-white rounded">
+                          {Math.round(mentor.score * 100)}%
                         </span>
                       </div>
                     </Link>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 bg-white border-2 border-cream-dark rounded-lg">
-                  <p className="text-ink-muted text-sm">No recommendations yet</p>
+                <div className="text-center py-6 bg-white rounded border-2 border-golden/30">
+                  <p className="text-ink-muted text-xs font-medium">No recommendations yet</p>
                   <Link
                     href="/"
-                    className="inline-block mt-2 text-sm font-medium text-terracotta hover:text-terracotta-dark"
+                    className="inline-block mt-2 px-3 py-1.5 text-xs font-bold uppercase tracking-wide bg-golden text-white rounded hover:bg-golden-dark transition-colors"
                   >
-                    Browse topics →
+                    Browse Topics
                   </Link>
                 </div>
               )}

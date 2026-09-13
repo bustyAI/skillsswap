@@ -4,142 +4,72 @@ import Link from "next/link";
 import { useAuth } from "@/providers/auth-provider";
 import { useTopics } from "@/hooks/use-topics";
 
-// Color rotation for topic cards
-const topicColors = [
-  { bg: "bg-terracotta-light", border: "border-terracotta", text: "text-terracotta-dark" },
-  { bg: "bg-olive-light", border: "border-olive", text: "text-olive-dark" },
-  { bg: "bg-golden-light", border: "border-golden", text: "text-golden-dark" },
-  { bg: "bg-teal-light", border: "border-teal", text: "text-teal-dark" },
-];
-
-// Simple SVG illustration component
 function HeroIllustration() {
   return (
     <svg
-      viewBox="0 0 400 240"
+      viewBox="0 0 480 280"
       fill="none"
-      className="w-full max-w-md mx-auto"
+      className="w-full max-w-xl mx-auto"
       aria-hidden="true"
     >
-      {/* Connection lines */}
+      {/* Background frame */}
+      <rect x="40" y="30" width="400" height="220" rx="8" fill="white" stroke="var(--cream-dark)" strokeWidth="3" />
+
+      {/* Connection arc - bold */}
       <path
-        d="M120 120 L200 80 L280 120"
+        d="M140 140 Q240 60 340 140"
         stroke="var(--golden)"
-        strokeWidth="2"
-        strokeDasharray="6 4"
+        strokeWidth="4"
         fill="none"
       />
       <path
-        d="M120 120 L200 160 L280 120"
+        d="M140 140 Q240 220 340 140"
         stroke="var(--teal)"
-        strokeWidth="2"
-        strokeDasharray="6 4"
+        strokeWidth="4"
         fill="none"
+        strokeDasharray="8 6"
       />
 
       {/* Left figure - the learner */}
-      <circle cx="120" cy="120" r="32" fill="var(--terracotta-light)" />
-      <circle cx="120" cy="108" r="12" fill="var(--terracotta)" />
-      <path
-        d="M108 124 Q120 140 132 124"
-        stroke="var(--terracotta)"
-        strokeWidth="3"
-        fill="none"
-        strokeLinecap="round"
-      />
-      <text
-        x="120"
-        y="175"
-        textAnchor="middle"
-        className="fill-ink-muted"
-        style={{ fontSize: "13px", fontFamily: "var(--font-body)" }}
-      >
+      <circle cx="140" cy="140" r="44" fill="var(--terracotta-light)" stroke="var(--terracotta)" strokeWidth="3" />
+      <circle cx="140" cy="125" r="14" fill="var(--terracotta)" />
+      <path d="M126 145 Q140 165 154 145" stroke="var(--terracotta)" strokeWidth="4" fill="none" strokeLinecap="round" />
+      <rect x="110" y="195" width="60" height="24" rx="4" fill="var(--terracotta)" />
+      <text x="140" y="212" textAnchor="middle" fill="white" style={{ fontSize: "12px", fontWeight: 700, fontFamily: "var(--font-body)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
         You
       </text>
 
-      {/* Center - the skill/topic */}
-      <rect
-        x="170"
-        y="100"
-        width="60"
-        height="40"
-        rx="6"
-        fill="var(--golden-light)"
-        stroke="var(--golden)"
-        strokeWidth="2"
-      />
-      <text
-        x="200"
-        y="125"
-        textAnchor="middle"
-        className="fill-golden-dark"
-        style={{ fontSize: "12px", fontWeight: 600, fontFamily: "var(--font-body)" }}
-      >
-        Skill
-      </text>
+      {/* Center - the skill badge */}
+      <g transform="translate(240, 140)">
+        <polygon points="0,-38 33,-19 33,19 0,38 -33,19 -33,-19" fill="var(--golden)" stroke="var(--golden-dark)" strokeWidth="3" />
+        <text y="6" textAnchor="middle" fill="white" style={{ fontSize: "14px", fontWeight: 700, fontFamily: "var(--font-display)" }}>
+          SKILL
+        </text>
+      </g>
 
       {/* Right figure - the mentor */}
-      <circle cx="280" cy="120" r="32" fill="var(--olive-light)" />
-      <circle cx="280" cy="108" r="12" fill="var(--olive)" />
-      <path
-        d="M268 124 Q280 140 292 124"
-        stroke="var(--olive)"
-        strokeWidth="3"
-        fill="none"
-        strokeLinecap="round"
-      />
-      {/* Mentor indicator - small teaching element */}
-      <rect x="295" y="95" width="16" height="20" rx="2" fill="var(--olive)" />
-      <line x1="299" y1="100" x2="307" y2="100" stroke="var(--olive-light)" strokeWidth="2" />
-      <line x1="299" y1="105" x2="305" y2="105" stroke="var(--olive-light)" strokeWidth="2" />
-      <line x1="299" y1="110" x2="307" y2="110" stroke="var(--olive-light)" strokeWidth="2" />
-      <text
-        x="280"
-        y="175"
-        textAnchor="middle"
-        className="fill-ink-muted"
-        style={{ fontSize: "13px", fontFamily: "var(--font-body)" }}
-      >
+      <circle cx="340" cy="140" r="44" fill="var(--olive-light)" stroke="var(--olive)" strokeWidth="3" />
+      <circle cx="340" cy="125" r="14" fill="var(--olive)" />
+      <path d="M326 145 Q340 165 354 145" stroke="var(--olive)" strokeWidth="4" fill="none" strokeLinecap="round" />
+      {/* Book/teaching symbol */}
+      <rect x="358" y="108" width="22" height="28" rx="2" fill="var(--olive)" stroke="var(--olive-dark)" strokeWidth="2" />
+      <line x1="363" y1="115" x2="375" y2="115" stroke="var(--olive-light)" strokeWidth="2" />
+      <line x1="363" y1="121" x2="372" y2="121" stroke="var(--olive-light)" strokeWidth="2" />
+      <line x1="363" y1="127" x2="375" y2="127" stroke="var(--olive-light)" strokeWidth="2" />
+      <rect x="310" y="195" width="60" height="24" rx="4" fill="var(--olive)" />
+      <text x="340" y="212" textAnchor="middle" fill="white" style={{ fontSize: "12px", fontWeight: 700, fontFamily: "var(--font-body)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
         Mentor
       </text>
 
-      {/* Small decorative elements */}
-      <circle cx="60" cy="60" r="4" fill="var(--terracotta)" opacity="0.4" />
-      <circle cx="340" cy="60" r="4" fill="var(--olive)" opacity="0.4" />
-      <circle cx="60" cy="180" r="3" fill="var(--teal)" opacity="0.4" />
-      <circle cx="340" cy="180" r="3" fill="var(--golden)" opacity="0.4" />
+      {/* Corner accents */}
+      <circle cx="60" cy="50" r="8" fill="var(--terracotta)" />
+      <circle cx="420" cy="50" r="8" fill="var(--olive)" />
+      <rect x="52" y="230" width="16" height="16" fill="var(--teal)" />
+      <polygon points="420,230 428,246 412,246" fill="var(--golden)" />
     </svg>
   );
 }
 
-// Decorative corner element
-function CornerDecoration({ position }: { position: "top-left" | "bottom-right" }) {
-  const isTopLeft = position === "top-left";
-  return (
-    <svg
-      className={`absolute ${isTopLeft ? "top-0 left-0" : "bottom-0 right-0"} w-24 h-24 pointer-events-none`}
-      viewBox="0 0 100 100"
-      fill="none"
-      aria-hidden="true"
-    >
-      {isTopLeft ? (
-        <>
-          <circle cx="10" cy="10" r="3" fill="var(--terracotta)" opacity="0.3" />
-          <circle cx="25" cy="15" r="2" fill="var(--golden)" opacity="0.3" />
-          <line x1="5" y1="30" x2="30" y2="30" stroke="var(--cream-dark)" strokeWidth="1" />
-          <line x1="5" y1="35" x2="20" y2="35" stroke="var(--cream-dark)" strokeWidth="1" />
-        </>
-      ) : (
-        <>
-          <circle cx="90" cy="90" r="3" fill="var(--olive)" opacity="0.3" />
-          <circle cx="75" cy="85" r="2" fill="var(--teal)" opacity="0.3" />
-          <line x1="70" y1="70" x2="95" y2="70" stroke="var(--cream-dark)" strokeWidth="1" />
-          <line x1="80" y1="65" x2="95" y2="65" stroke="var(--cream-dark)" strokeWidth="1" />
-        </>
-      )}
-    </svg>
-  );
-}
 
 export default function Home() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -148,29 +78,28 @@ export default function Home() {
   return (
     <main className="flex flex-1 flex-col">
       {/* Hero Section */}
-      <section className="relative px-6 py-16 md:py-24">
-        <CornerDecoration position="top-left" />
-        <CornerDecoration position="bottom-right" />
+      <section className="relative px-6 py-20 md:py-28 border-b-[3px] border-ink">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-sm font-bold uppercase tracking-widest text-terracotta mb-4">
+              Mentorship Made Simple
+            </p>
+            <h1 className="font-display text-ink mb-6 max-w-3xl mx-auto">
+              Learn any skill with guidance from someone who&apos;s been there
+            </h1>
+            <p className="text-xl text-ink-muted max-w-2xl mx-auto leading-relaxed">
+              SkillSwap connects you with mentors who teach what they know best.
+              Browse by topic, find your guide, and start learning.
+            </p>
+          </div>
 
-        <div className="max-w-3xl mx-auto text-center">
-          <h1 className="font-display text-ink mb-6">
-            Learn any skill with guidance from someone who&apos;s been there
-          </h1>
-
-          <p className="text-lg text-ink-muted max-w-xl mx-auto mb-10 leading-relaxed">
-            SkillSwap connects you with mentors who teach what they know best.
-            Browse by topic, find your guide, and start learning.
-          </p>
-
-          {/* Illustration */}
-          <div className="mb-10">
+          <div className="mb-12">
             <HeroIllustration />
           </div>
 
-          {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {authLoading ? (
-              <div className="h-12 w-40 bg-cream-dark rounded-lg animate-pulse" />
+              <div className="h-14 w-48 bg-cream-dark rounded-lg animate-pulse" />
             ) : isAuthenticated ? (
               <Link href="/dashboard" className="btn btn-primary">
                 Continue to Dashboard
@@ -190,46 +119,45 @@ export default function Home() {
       </section>
 
       {/* Topics Section */}
-      <section className="px-6 py-16 bg-white">
+      <section className="px-6 py-20 bg-white">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-4 mb-8">
+          <div className="flex items-center gap-6 mb-10">
             <h2 className="font-display text-ink">Browse by Topic</h2>
-            <div className="flex-1 h-px bg-cream-dark" />
+            <div className="flex-1 h-[3px] bg-ink" />
           </div>
 
           {topicsLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="h-28 rounded-lg bg-cream animate-pulse"
-                />
+                <div key={i} className="h-32 rounded-lg bg-cream-dark animate-pulse" />
               ))}
             </div>
           ) : error ? (
-            <div className="text-center py-12 px-6 bg-error-light rounded-lg">
-              <p className="text-error font-medium">
-                Unable to load topics right now
-              </p>
-              <p className="text-ink-muted text-sm mt-1">
-                Please try again later
-              </p>
+            <div className="text-center py-12 px-6 bg-error-light rounded-lg border-[3px] border-error/20">
+              <p className="text-error font-bold">Unable to load topics right now</p>
+              <p className="text-ink-muted text-sm mt-1">Please try again later</p>
             </div>
           ) : topicsData && topicsData.items.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {topicsData.items.map((topic, index) => {
-                const colorScheme = topicColors[index % topicColors.length];
+                const colors = [
+                  "bg-terracotta-light border-terracotta text-terracotta-dark hover:bg-terracotta hover:text-white",
+                  "bg-golden-light border-golden text-golden-dark hover:bg-golden hover:text-white",
+                  "bg-teal-light border-teal text-teal-dark hover:bg-teal hover:text-white",
+                  "bg-olive-light border-olive text-olive-dark hover:bg-olive hover:text-white",
+                ];
+                const colorClass = colors[index % colors.length];
                 return (
                   <Link
                     key={topic.id}
                     href={`/topics/${topic.id}`}
-                    className={`group p-5 rounded-lg border-2 ${colorScheme.border} ${colorScheme.bg} transition-all duration-200 hover:translate-y-[-2px] hover:shadow-md`}
+                    className={`group block p-6 rounded-lg border-[3px] ${colorClass} transition-all duration-150 hover:translate-y-[-3px] hover:shadow-lg`}
                   >
-                    <h3 className={`font-display font-semibold ${colorScheme.text} mb-2`}>
+                    <h3 className="font-display font-bold text-lg mb-2">
                       {topic.name}
                     </h3>
                     {topic.description && (
-                      <p className="text-ink-muted text-sm line-clamp-2 leading-relaxed">
+                      <p className="text-sm line-clamp-2 leading-relaxed opacity-80 group-hover:opacity-100">
                         {topic.description}
                       </p>
                     )}
@@ -238,63 +166,51 @@ export default function Home() {
               })}
             </div>
           ) : (
-            <div className="text-center py-12 px-6 bg-cream rounded-lg">
-              <p className="text-ink-muted">
-                No topics available yet. Check back soon.
-              </p>
+            <div className="text-center py-12 px-6 bg-cream rounded-lg border-[3px] border-cream-dark">
+              <p className="text-ink-muted font-medium">No topics available yet. Check back soon.</p>
             </div>
           )}
         </div>
       </section>
 
       {/* How It Works Section */}
-      <section className="px-6 py-16">
+      <section className="px-6 py-20 border-b-[3px] border-ink">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-4 mb-12">
+          <div className="flex items-center gap-6 mb-14">
             <h2 className="font-display text-ink">How It Works</h2>
-            <div className="flex-1 h-px bg-cream-dark" />
+            <div className="flex-1 h-[3px] bg-ink" />
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 md:gap-12">
+          <div className="grid md:grid-cols-3 gap-10">
             {/* Step 1 */}
             <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-terracotta-light flex items-center justify-center">
-                <svg className="w-8 h-8" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-                  <circle cx="16" cy="16" r="10" stroke="var(--terracotta)" strokeWidth="2" />
-                  <circle cx="16" cy="16" r="4" fill="var(--terracotta)" />
-                </svg>
+              <div className="w-20 h-20 mx-auto mb-5 rounded-full bg-terracotta flex items-center justify-center border-[3px] border-terracotta-dark">
+                <span className="font-display font-bold text-2xl text-white">1</span>
               </div>
-              <h3 className="font-display text-lg mb-2">Find a Topic</h3>
-              <p className="text-ink-muted text-sm leading-relaxed">
+              <h3 className="font-display text-xl font-bold mb-3">Find a Topic</h3>
+              <p className="text-ink-muted leading-relaxed">
                 Browse skills you want to learn. Each topic has mentors ready to help.
               </p>
             </div>
 
             {/* Step 2 */}
             <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-olive-light flex items-center justify-center">
-                <svg className="w-8 h-8" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-                  <circle cx="12" cy="14" r="6" stroke="var(--olive)" strokeWidth="2" />
-                  <circle cx="20" cy="14" r="6" stroke="var(--olive)" strokeWidth="2" />
-                  <path d="M16 20 L16 26" stroke="var(--olive)" strokeWidth="2" strokeLinecap="round" />
-                </svg>
+              <div className="w-20 h-20 mx-auto mb-5 rounded-full bg-golden flex items-center justify-center border-[3px] border-golden-dark">
+                <span className="font-display font-bold text-2xl text-white">2</span>
               </div>
-              <h3 className="font-display text-lg mb-2">Connect with a Mentor</h3>
-              <p className="text-ink-muted text-sm leading-relaxed">
+              <h3 className="font-display text-xl font-bold mb-3">Connect</h3>
+              <p className="text-ink-muted leading-relaxed">
                 Read profiles, see reviews, and request mentorship from someone who fits.
               </p>
             </div>
 
             {/* Step 3 */}
             <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-golden-light flex items-center justify-center">
-                <svg className="w-8 h-8" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-                  <path d="M8 24 L16 8 L24 24" stroke="var(--golden)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  <circle cx="16" cy="18" r="3" fill="var(--golden)" />
-                </svg>
+              <div className="w-20 h-20 mx-auto mb-5 rounded-full bg-teal flex items-center justify-center border-[3px] border-teal-dark">
+                <span className="font-display font-bold text-2xl text-white">3</span>
               </div>
-              <h3 className="font-display text-lg mb-2">Start Learning</h3>
-              <p className="text-ink-muted text-sm leading-relaxed">
+              <h3 className="font-display text-xl font-bold mb-3">Start Learning</h3>
+              <p className="text-ink-muted leading-relaxed">
                 Schedule meetings, exchange messages, and grow your skills with guidance.
               </p>
             </div>
@@ -303,10 +219,10 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="px-6 py-8 border-t border-cream-dark">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-ink-muted">
-          <p>SkillSwap — Learn from those who know</p>
-          <p>A capstone project</p>
+      <footer className="px-6 py-10 bg-ink text-cream">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="font-display font-bold text-lg">SkillSwap</p>
+          <p className="text-sm text-cream/70">Learn from those who know</p>
         </div>
       </footer>
     </main>
