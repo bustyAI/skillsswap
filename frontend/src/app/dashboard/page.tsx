@@ -23,33 +23,31 @@ function formatDateTime(dateStr: string): string {
   });
 }
 
+const statusColors = {
+  ACTIVE: "bg-olive-light text-olive-dark",
+  REQUESTED: "bg-golden-light text-golden-dark",
+  SCHEDULED: "bg-teal-light text-teal-dark",
+  DEFAULT: "bg-cream-dark text-ink-muted",
+};
+
 function MentorshipCard({ mentorship, role }: { mentorship: Mentorship; role: MentorshipTab }) {
   const otherParty = role === "mentee" ? mentorship.mentor : mentorship.mentee;
   const otherPartyLabel = role === "mentee" ? "Mentor" : "Mentee";
+  const statusClass = statusColors[mentorship.status as keyof typeof statusColors] || statusColors.DEFAULT;
 
   return (
     <Link
       href={`/mentorships/${mentorship.id}`}
-      className="block p-4 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-400 dark:hover:border-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+      className="block p-4 bg-white border-2 border-cream-dark rounded-lg hover:border-terracotta transition-colors"
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="font-medium text-zinc-900 dark:text-zinc-100">
+          <p className="font-medium text-ink">
             {otherParty?.display_name || otherParty?.email || "Unknown"}
           </p>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            {otherPartyLabel}
-          </p>
+          <p className="text-sm text-ink-muted">{otherPartyLabel}</p>
         </div>
-        <span
-          className={`text-xs px-2 py-1 rounded ${
-            mentorship.status === "ACTIVE"
-              ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-              : mentorship.status === "REQUESTED"
-              ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
-              : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-          }`}
-        >
+        <span className={`text-xs font-medium px-2 py-1 rounded ${statusClass}`}>
           {mentorship.status}
         </span>
       </div>
@@ -58,33 +56,23 @@ function MentorshipCard({ mentorship, role }: { mentorship: Mentorship; role: Me
 }
 
 function MeetingCard({ meeting }: { meeting: Meeting }) {
-  const otherParty =
-    meeting.mentorship?.mentor || meeting.mentorship?.mentee;
+  const otherParty = meeting.mentorship?.mentor || meeting.mentorship?.mentee;
+  const statusClass = statusColors[meeting.status as keyof typeof statusColors] || statusColors.DEFAULT;
 
   return (
-    <div className="p-4 border border-zinc-200 dark:border-zinc-700 rounded-lg">
+    <div className="p-4 bg-white border-2 border-cream-dark rounded-lg">
       <div className="flex items-center justify-between">
         <div>
           {meeting.scheduled_time && (
-            <p className="font-medium text-zinc-900 dark:text-zinc-100">
-              {formatDateTime(meeting.scheduled_time)}
-            </p>
+            <p className="font-medium text-ink">{formatDateTime(meeting.scheduled_time)}</p>
           )}
           {otherParty && (
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="text-sm text-ink-muted">
               with {otherParty.display_name || otherParty.email}
             </p>
           )}
         </div>
-        <span
-          className={`text-xs px-2 py-1 rounded ${
-            meeting.status === "SCHEDULED"
-              ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400"
-              : meeting.status === "REQUESTED"
-              ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
-              : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-          }`}
-        >
+        <span className={`text-xs font-medium px-2 py-1 rounded ${statusClass}`}>
           {meeting.status}
         </span>
       </div>
@@ -93,9 +81,9 @@ function MeetingCard({ meeting }: { meeting: Meeting }) {
           href={meeting.meeting_url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-block mt-2 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 underline"
+          className="inline-block mt-3 text-sm font-medium text-terracotta hover:text-terracotta-dark"
         >
-          Join Meeting
+          Join Meeting →
         </a>
       )}
     </div>
@@ -141,52 +129,47 @@ export default function DashboardPage() {
   if (userLoading) {
     return (
       <main className="flex flex-1 items-center justify-center">
-        <p className="text-zinc-500">Loading...</p>
+        <p className="text-ink-muted">Loading...</p>
       </main>
     );
   }
 
   return (
     <main className="flex flex-1 flex-col">
-      <header className="border-b border-zinc-200 dark:border-zinc-800">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-xl font-bold text-zinc-900 dark:text-zinc-100"
-          >
+      <header className="border-b border-cream-dark bg-white">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/" className="font-display text-xl font-bold text-ink">
             SkillSwap
           </Link>
-          <div className="flex items-center gap-4">
+          <nav className="flex items-center gap-6">
             <Link
               href="/dashboard/profile"
-              className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+              className="text-sm text-ink-muted hover:text-ink transition-colors"
             >
-              Edit Profile
+              Profile
             </Link>
             <Link
               href="/dashboard/mentor-profile"
-              className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+              className="text-sm text-ink-muted hover:text-ink transition-colors"
             >
               Mentor Profile
             </Link>
             <button
               onClick={handleSignOut}
-              className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+              className="text-sm text-ink-muted hover:text-ink transition-colors"
             >
               Sign out
             </button>
-          </div>
+          </nav>
         </div>
       </header>
 
-      <div className="flex-1 max-w-4xl mx-auto w-full px-6 py-8">
+      <div className="flex-1 max-w-5xl mx-auto w-full px-6 py-8">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-            Dashboard
-          </h1>
+          <h1 className="font-display text-2xl text-ink">Dashboard</h1>
           {user && (
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              {user.display_name || user.email}
+            <p className="text-sm text-ink-muted">
+              Welcome, {user.display_name || user.email}
             </p>
           )}
         </div>
@@ -194,17 +177,18 @@ export default function DashboardPage() {
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-8">
             <section>
-              <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-4">
-                My Mentorships
-              </h2>
+              <div className="flex items-center gap-4 mb-4">
+                <h2 className="font-display text-lg text-ink">My Mentorships</h2>
+                <div className="flex-1 h-px bg-cream-dark" />
+              </div>
 
               <div className="flex gap-2 mb-4">
                 <button
                   onClick={() => setActiveTab("mentee")}
                   className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                     activeTab === "mentee"
-                      ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900"
-                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                      ? "bg-terracotta text-white"
+                      : "bg-cream-dark text-ink-muted hover:text-ink"
                   }`}
                 >
                   As Mentee ({mentorshipsAsMentee.length})
@@ -213,8 +197,8 @@ export default function DashboardPage() {
                   onClick={() => setActiveTab("mentor")}
                   className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                     activeTab === "mentor"
-                      ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900"
-                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                      ? "bg-terracotta text-white"
+                      : "bg-cream-dark text-ink-muted hover:text-ink"
                   }`}
                 >
                   As Mentor ({mentorshipsAsMentor.length})
@@ -224,25 +208,18 @@ export default function DashboardPage() {
               {mentorshipsLoading ? (
                 <div className="space-y-3">
                   {Array.from({ length: 3 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="h-16 bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse"
-                    />
+                    <div key={i} className="h-16 bg-cream-dark rounded-lg animate-pulse" />
                   ))}
                 </div>
               ) : activeMentorships.length > 0 ? (
                 <div className="space-y-3">
                   {activeMentorships.map((mentorship) => (
-                    <MentorshipCard
-                      key={mentorship.id}
-                      mentorship={mentorship}
-                      role={activeTab}
-                    />
+                    <MentorshipCard key={mentorship.id} mentorship={mentorship} role={activeTab} />
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 border border-zinc-200 dark:border-zinc-700 rounded-lg">
-                  <p className="text-zinc-500 dark:text-zinc-400">
+                <div className="text-center py-8 bg-white border-2 border-cream-dark rounded-lg">
+                  <p className="text-ink-muted">
                     {activeTab === "mentee"
                       ? "You have no mentorships as a mentee yet."
                       : "You have no mentorships as a mentor yet."}
@@ -250,9 +227,9 @@ export default function DashboardPage() {
                   {activeTab === "mentee" && (
                     <Link
                       href="/"
-                      className="inline-block mt-4 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 underline"
+                      className="inline-block mt-3 text-sm font-medium text-terracotta hover:text-terracotta-dark"
                     >
-                      Browse topics to find a mentor
+                      Browse topics to find a mentor →
                     </Link>
                   )}
                 </div>
@@ -260,17 +237,15 @@ export default function DashboardPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-4">
-                Upcoming Meetings
-              </h2>
+              <div className="flex items-center gap-4 mb-4">
+                <h2 className="font-display text-lg text-ink">Upcoming Meetings</h2>
+                <div className="flex-1 h-px bg-cream-dark" />
+              </div>
 
               {meetingsLoading ? (
                 <div className="space-y-3">
                   {Array.from({ length: 2 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="h-20 bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse"
-                    />
+                    <div key={i} className="h-20 bg-cream-dark rounded-lg animate-pulse" />
                   ))}
                 </div>
               ) : upcomingMeetings.length > 0 ? (
@@ -280,10 +255,8 @@ export default function DashboardPage() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 border border-zinc-200 dark:border-zinc-700 rounded-lg">
-                  <p className="text-zinc-500 dark:text-zinc-400">
-                    No upcoming meetings
-                  </p>
+                <div className="text-center py-8 bg-white border-2 border-cream-dark rounded-lg">
+                  <p className="text-ink-muted">No upcoming meetings</p>
                 </div>
               )}
             </section>
@@ -291,17 +264,15 @@ export default function DashboardPage() {
 
           <div>
             <section>
-              <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-4">
-                Recommended Mentors
-              </h2>
+              <div className="flex items-center gap-4 mb-4">
+                <h2 className="font-display text-lg text-ink">Recommended</h2>
+                <div className="flex-1 h-px bg-cream-dark" />
+              </div>
 
               {recommendationsLoading ? (
                 <div className="space-y-3">
                   {Array.from({ length: 3 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="h-16 bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse"
-                    />
+                    <div key={i} className="h-20 bg-cream-dark rounded-lg animate-pulse" />
                   ))}
                 </div>
               ) : recommendationsData && recommendationsData.items.length > 0 ? (
@@ -310,23 +281,23 @@ export default function DashboardPage() {
                     <Link
                       key={mentor.id}
                       href={`/mentors/${mentor.user_id}`}
-                      className="block p-3 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-400 dark:hover:border-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+                      className="block p-4 bg-white border-2 border-cream-dark rounded-lg hover:border-olive transition-colors"
                     >
-                      <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">
+                      <p className="font-medium text-ink text-sm">
                         {mentor.display_name || "Anonymous"}
                       </p>
                       {mentor.headline && (
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-1">
+                        <p className="text-xs text-ink-muted mt-1 line-clamp-2">
                           {mentor.headline}
                         </p>
                       )}
                       <div className="flex items-center justify-between mt-2">
-                        <span className="text-xs text-zinc-400">
+                        <span className="text-xs text-golden-dark">
                           {mentor.rating_avg != null
                             ? `★ ${Number(mentor.rating_avg).toFixed(1)}`
-                            : "No ratings"}
+                            : "New mentor"}
                         </span>
-                        <span className="text-xs px-2 py-0.5 bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 rounded">
+                        <span className="text-xs px-2 py-0.5 bg-olive-light text-olive-dark rounded">
                           {Math.round(mentor.score * 100)}% match
                         </span>
                       </div>
@@ -334,15 +305,13 @@ export default function DashboardPage() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 border border-zinc-200 dark:border-zinc-700 rounded-lg">
-                  <p className="text-zinc-500 dark:text-zinc-400 text-sm">
-                    No recommendations available
-                  </p>
+                <div className="text-center py-8 bg-white border-2 border-cream-dark rounded-lg">
+                  <p className="text-ink-muted text-sm">No recommendations yet</p>
                   <Link
                     href="/"
-                    className="inline-block mt-2 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 underline"
+                    className="inline-block mt-2 text-sm font-medium text-terracotta hover:text-terracotta-dark"
                   >
-                    Browse topics
+                    Browse topics →
                   </Link>
                 </div>
               )}

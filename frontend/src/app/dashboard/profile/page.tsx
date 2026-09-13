@@ -60,10 +60,7 @@ function ProfileForm({ initialDisplayName }: { initialDisplayName: string | null
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label
-          htmlFor="display_name"
-          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
-        >
+        <label htmlFor="display_name" className="block text-sm font-medium text-ink mb-2">
           Display Name
         </label>
         <input
@@ -72,45 +69,33 @@ function ProfileForm({ initialDisplayName }: { initialDisplayName: string | null
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
           placeholder="Enter your display name"
-          className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 ${
-            errors.display_name
-              ? "border-red-500 dark:border-red-400"
-              : "border-zinc-200 dark:border-zinc-700"
-          }`}
+          className={`input ${errors.display_name ? "border-error" : ""}`}
         />
         {errors.display_name && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-            {errors.display_name}
-          </p>
+          <p className="mt-1 text-sm text-error">{errors.display_name}</p>
         )}
       </div>
 
       {apiError && (
-        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <p className="text-sm text-red-600 dark:text-red-400">{apiError}</p>
+        <div className="p-4 bg-error-light rounded-lg">
+          <p className="text-sm text-error">{apiError}</p>
         </div>
       )}
 
       {success && (
-        <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-          <p className="text-sm text-green-600 dark:text-green-400">
-            Profile updated successfully
-          </p>
+        <div className="p-4 bg-success-light rounded-lg">
+          <p className="text-sm text-success">Profile updated successfully</p>
         </div>
       )}
 
       <div className="flex items-center gap-4">
-        <button
-          type="submit"
-          disabled={updateUser.isPending}
-          className="px-6 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-medium rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        <button type="submit" disabled={updateUser.isPending} className="btn btn-primary">
           {updateUser.isPending ? "Saving..." : "Save Changes"}
         </button>
         <button
           type="button"
           onClick={() => router.push("/dashboard")}
-          className="px-6 py-2 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+          className="btn btn-secondary"
         >
           Cancel
         </button>
@@ -125,24 +110,21 @@ export default function ProfilePage() {
   if (isLoading) {
     return (
       <main className="flex flex-1 items-center justify-center">
-        <p className="text-zinc-500">Loading...</p>
+        <p className="text-ink-muted">Loading...</p>
       </main>
     );
   }
 
   return (
     <main className="flex flex-1 flex-col">
-      <header className="border-b border-zinc-200 dark:border-zinc-800">
+      <header className="border-b border-cream-dark bg-white">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-xl font-bold text-zinc-900 dark:text-zinc-100"
-          >
+          <Link href="/" className="font-display text-xl font-bold text-ink">
             SkillSwap
           </Link>
           <Link
             href="/dashboard"
-            className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+            className="text-sm text-ink-muted hover:text-ink transition-colors"
           >
             ← Back to Dashboard
           </Link>
@@ -150,31 +132,20 @@ export default function ProfilePage() {
       </header>
 
       <div className="flex-1 max-w-2xl mx-auto w-full px-6 py-8">
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 mb-8">
-          Edit Profile
-        </h1>
+        <h1 className="font-display text-2xl text-ink mb-8">Edit Profile</h1>
 
         <div className="mb-6">
-          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-            Email
-          </label>
+          <label className="block text-sm font-medium text-ink mb-2">Email</label>
           <input
             type="email"
             value={user?.email || ""}
             disabled
-            className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 text-zinc-500 dark:text-zinc-400 cursor-not-allowed"
+            className="input bg-cream-dark text-ink-muted cursor-not-allowed"
           />
-          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-            Email cannot be changed
-          </p>
+          <p className="mt-1 text-xs text-ink-faint">Email cannot be changed</p>
         </div>
 
-        {user && (
-          <ProfileForm
-            key={user.id}
-            initialDisplayName={user.display_name}
-          />
-        )}
+        {user && <ProfileForm key={user.id} initialDisplayName={user.display_name} />}
       </div>
     </main>
   );

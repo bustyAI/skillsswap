@@ -17,7 +17,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   if (isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <p className="text-zinc-500">Loading...</p>
+        <p className="text-ink-muted">Loading...</p>
       </div>
     );
   }
