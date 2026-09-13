@@ -55,38 +55,28 @@ function ConfirmForm() {
   return (
     <div className="w-full max-w-sm">
       <div className="text-center mb-8">
-        <Link
-          href="/"
-          className="text-xl font-bold text-zinc-900 dark:text-zinc-100"
-        >
-          SkillSwap
+        <Link href="/" className="inline-block">
+          <span className="font-display text-2xl font-bold text-ink">SkillSwap</span>
         </Link>
-        <h1 className="mt-6 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-          Check your email
-        </h1>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-          We sent a verification code to your email address
-        </p>
+        <h1 className="mt-8 font-display text-2xl text-ink">Check your email</h1>
+        <p className="mt-2 text-ink-muted">We sent a verification code to your email</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
-          <div className="p-3 text-sm text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg">
+          <div className="p-3 text-sm text-error bg-error-light rounded-lg">
             {error}
           </div>
         )}
 
         {message && (
-          <div className="p-3 text-sm text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-lg">
+          <div className="p-3 text-sm text-success bg-success-light rounded-lg">
             {message}
           </div>
         )}
 
         <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5"
-          >
+          <label htmlFor="email" className="block text-sm font-medium text-ink mb-1.5">
             Email address
           </label>
           <input
@@ -96,16 +86,13 @@ function ConfirmForm() {
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
-            className="w-full px-3 py-2.5 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 focus:border-transparent transition-shadow"
+            className="input"
             placeholder="you@example.com"
           />
         </div>
 
         <div>
-          <label
-            htmlFor="code"
-            className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5"
-          >
+          <label htmlFor="code" className="block text-sm font-medium text-ink mb-1.5">
             Verification code
           </label>
           <input
@@ -115,16 +102,12 @@ function ConfirmForm() {
             onChange={(e) => setCode(e.target.value)}
             required
             autoComplete="one-time-code"
-            className="w-full px-3 py-2.5 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 focus:border-transparent transition-shadow"
+            className="input"
             placeholder="Enter 6-digit code"
           />
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-2.5 px-4 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-medium rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
+        <button type="submit" disabled={loading} className="btn btn-primary w-full">
           {loading ? "Verifying..." : "Verify Email"}
         </button>
       </form>
@@ -132,17 +115,15 @@ function ConfirmForm() {
       <div className="mt-6 text-center">
         <button
           onClick={handleResend}
-          className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+          className="text-sm text-ink-muted hover:text-ink transition-colors"
         >
-          Didn&apos;t receive a code? <span className="font-medium underline">Resend</span>
+          Didn&apos;t receive a code?{" "}
+          <span className="font-medium text-terracotta hover:text-terracotta-dark">Resend</span>
         </button>
       </div>
 
-      <p className="mt-4 text-center text-sm text-zinc-600 dark:text-zinc-400">
-        <Link
-          href="/auth/signin"
-          className="font-medium text-zinc-900 dark:text-zinc-100 hover:underline"
-        >
+      <p className="mt-4 text-center text-sm text-ink-muted">
+        <Link href="/auth/signin" className="font-medium text-terracotta hover:text-terracotta-dark">
           Back to sign in
         </Link>
       </p>
@@ -154,14 +135,14 @@ function ConfirmFormFallback() {
   return (
     <div className="w-full max-w-sm animate-pulse">
       <div className="text-center mb-8">
-        <div className="h-6 w-24 bg-zinc-200 dark:bg-zinc-700 rounded mx-auto" />
-        <div className="mt-6 h-8 w-48 bg-zinc-200 dark:bg-zinc-700 rounded mx-auto" />
-        <div className="mt-2 h-4 w-64 bg-zinc-200 dark:bg-zinc-700 rounded mx-auto" />
+        <div className="h-6 w-24 bg-cream-dark rounded mx-auto" />
+        <div className="mt-8 h-8 w-48 bg-cream-dark rounded mx-auto" />
+        <div className="mt-2 h-4 w-64 bg-cream-dark rounded mx-auto" />
       </div>
       <div className="space-y-5">
-        <div className="h-10 bg-zinc-200 dark:bg-zinc-700 rounded" />
-        <div className="h-10 bg-zinc-200 dark:bg-zinc-700 rounded" />
-        <div className="h-10 bg-zinc-200 dark:bg-zinc-700 rounded" />
+        <div className="h-12 bg-cream-dark rounded-lg" />
+        <div className="h-12 bg-cream-dark rounded-lg" />
+        <div className="h-12 bg-cream-dark rounded-lg" />
       </div>
     </div>
   );
