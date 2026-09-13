@@ -12,20 +12,27 @@ interface PageProps {
   params: Promise<{ userId: string }>;
 }
 
+const topicColors = [
+  "bg-terracotta-light text-terracotta-dark hover:bg-terracotta hover:text-white",
+  "bg-olive-light text-olive-dark hover:bg-olive hover:text-white",
+  "bg-golden-light text-golden-dark hover:bg-golden hover:text-white",
+  "bg-teal-light text-teal-dark hover:bg-teal hover:text-white",
+];
+
 function StarRating({ rating, size = "md" }: { rating: number | null; size?: "sm" | "md" }) {
   const textSize = size === "sm" ? "text-sm" : "text-lg";
   if (rating === null || rating === undefined) {
-    return <span className={`text-zinc-400 ${textSize}`}>No ratings yet</span>;
+    return <span className={`text-ink-faint ${textSize}`}>No ratings yet</span>;
   }
   const numRating = Number(rating);
   if (isNaN(numRating)) {
-    return <span className={`text-zinc-400 ${textSize}`}>No ratings yet</span>;
+    return <span className={`text-ink-faint ${textSize}`}>No ratings yet</span>;
   }
   return (
-    <span className={`text-zinc-600 dark:text-zinc-400 ${textSize}`}>
+    <span className={`text-golden-dark ${textSize}`}>
       {"★".repeat(Math.round(numRating))}
       {"☆".repeat(5 - Math.round(numRating))}
-      <span className="ml-1">{numRating.toFixed(1)}</span>
+      <span className="ml-1 text-ink-muted">{numRating.toFixed(1)}</span>
     </span>
   );
 }
@@ -56,10 +63,7 @@ export default function MentorPage({ params }: PageProps) {
     error: reviewsError,
   } = useMentorReviews(userId);
 
-  const {
-    data: topicsData,
-    isLoading: topicsLoading,
-  } = useMentorTopics(userId);
+  const { data: topicsData, isLoading: topicsLoading } = useMentorTopics(userId);
 
   const createMentorship = useCreateMentorship();
 
@@ -89,9 +93,9 @@ export default function MentorPage({ params }: PageProps) {
     return (
       <main className="flex flex-1 flex-col px-6 py-12">
         <div className="max-w-3xl mx-auto w-full">
-          <div className="h-6 w-32 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse" />
-          <div className="h-8 w-64 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse mt-4" />
-          <div className="h-24 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse mt-4" />
+          <div className="h-6 w-32 bg-cream-dark rounded animate-pulse" />
+          <div className="h-8 w-64 bg-cream-dark rounded animate-pulse mt-4" />
+          <div className="h-32 bg-cream-dark rounded-lg animate-pulse mt-4" />
         </div>
       </main>
     );
@@ -100,8 +104,8 @@ export default function MentorPage({ params }: PageProps) {
   if (mentorError || !mentor) {
     return (
       <main className="flex flex-1 flex-col items-center justify-center px-6 py-12">
-        <p className="text-red-600 dark:text-red-400">Mentor not found</p>
-        <Link href="/" className="mt-4 text-zinc-600 dark:text-zinc-400 underline">
+        <p className="text-error">Mentor not found</p>
+        <Link href="/" className="mt-4 text-terracotta hover:text-terracotta-dark">
           Browse topics
         </Link>
       </main>
@@ -113,129 +117,107 @@ export default function MentorPage({ params }: PageProps) {
       <div className="max-w-3xl mx-auto w-full">
         <Link
           href="/"
-          className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 mb-6 inline-block"
+          className="text-sm text-ink-muted hover:text-ink mb-6 inline-block"
         >
           ← Browse Topics
         </Link>
 
-        <div className="border border-zinc-200 dark:border-zinc-700 rounded-lg p-6">
+        <div className="bg-white border-2 border-cream-dark rounded-lg p-6">
           {mentor.headline && (
-            <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-              {mentor.headline}
-            </h1>
+            <h1 className="font-display text-2xl text-ink">{mentor.headline}</h1>
           )}
 
-          <div className="mt-3 flex items-center gap-4">
+          <div className="mt-3 flex items-center gap-3">
             <StarRating rating={mentor.rating_avg ? Number(mentor.rating_avg) : null} />
-            <span className="text-zinc-400">({mentor.rating_count} reviews)</span>
+            <span className="text-ink-faint">({mentor.rating_count} reviews)</span>
           </div>
 
           {mentor.bio && (
             <div className="mt-6">
-              <h2 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
-                About
-              </h2>
-              <p className="mt-2 text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">
-                {mentor.bio}
-              </p>
+              <h2 className="text-sm font-medium text-ink-muted mb-2">About</h2>
+              <p className="text-ink leading-relaxed whitespace-pre-wrap">{mentor.bio}</p>
             </div>
           )}
 
           <div className="mt-6">
-            <h2 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
-              Topics
-            </h2>
+            <h2 className="text-sm font-medium text-ink-muted mb-2">Topics</h2>
             {topicsLoading ? (
-              <div className="mt-2 flex gap-2">
+              <div className="flex gap-2">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="h-6 w-20 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse"
-                  />
+                  <div key={i} className="h-8 w-20 bg-cream-dark rounded-lg animate-pulse" />
                 ))}
               </div>
             ) : topicsData && topicsData.topics.length > 0 ? (
-              <div className="mt-2 flex flex-wrap gap-2">
-                {topicsData.topics.map((topic) => (
+              <div className="flex flex-wrap gap-2">
+                {topicsData.topics.map((topic, index) => (
                   <Link
                     key={topic.id}
                     href={`/topics/${topic.id}`}
-                    className="px-3 py-1 text-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                    className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${topicColors[index % topicColors.length]}`}
                   >
                     {topic.name}
                   </Link>
                 ))}
               </div>
             ) : (
-              <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-                No topics listed
-              </p>
+              <p className="text-sm text-ink-faint">No topics listed</p>
             )}
           </div>
 
-          <div className="mt-6 pt-6 border-t border-zinc-200 dark:border-zinc-700">
+          <div className="mt-8 pt-6 border-t border-cream-dark">
             {authLoading ? (
-              <div className="h-10 w-40 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse" />
+              <div className="h-10 w-40 bg-cream-dark rounded-lg animate-pulse" />
             ) : isAuthenticated ? (
               <div>
                 <button
                   onClick={handleRequestMentorship}
                   disabled={createMentorship.isPending}
-                  className="px-6 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-medium rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn btn-primary"
                 >
                   {createMentorship.isPending ? "Requesting..." : "Request Mentorship"}
                 </button>
                 {requestError && (
-                  <p className="mt-2 text-sm text-red-600 dark:text-red-400">{requestError}</p>
+                  <p className="mt-2 text-sm text-error">{requestError}</p>
                 )}
               </div>
             ) : (
-              <Link
-                href="/auth/signin"
-                className="inline-block px-6 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-medium rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
-              >
+              <Link href="/auth/signin" className="btn btn-primary">
                 Sign in to request mentorship
               </Link>
             )}
           </div>
         </div>
 
-        <section className="mt-8">
-          <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
-            Reviews
-          </h2>
+        <section className="mt-10">
+          <div className="flex items-center gap-4 mb-6">
+            <h2 className="font-display text-xl text-ink">Reviews</h2>
+            <div className="flex-1 h-px bg-cream-dark" />
+          </div>
 
           {reviewsLoading ? (
             <div className="space-y-4">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="h-20 bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse"
-                />
+                <div key={i} className="h-24 bg-cream-dark rounded-lg animate-pulse" />
               ))}
             </div>
           ) : reviewsError ? (
-            <p className="text-red-600 dark:text-red-400">Failed to load reviews</p>
+            <p className="text-error">Failed to load reviews</p>
           ) : reviewsData && reviewsData.reviews.length > 0 ? (
             <div className="space-y-4">
               {reviewsData.reviews.map((review) => (
                 <div
                   key={review.id}
-                  className="p-4 border border-zinc-200 dark:border-zinc-700 rounded-lg"
+                  className="p-5 bg-white border-2 border-cream-dark rounded-lg"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <StarRating rating={review.rating} size="sm" />
-                    </div>
-                    <span className="text-sm text-zinc-400">
-                      {formatDate(review.created_at)}
-                    </span>
+                    <StarRating rating={review.rating} size="sm" />
+                    <span className="text-sm text-ink-faint">{formatDate(review.created_at)}</span>
                   </div>
                   {review.comment && (
-                    <p className="mt-2 text-zinc-700 dark:text-zinc-300">{review.comment}</p>
+                    <p className="mt-3 text-ink leading-relaxed">{review.comment}</p>
                   )}
                   {review.reviewer && (
-                    <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+                    <p className="mt-3 text-sm text-ink-muted">
                       — {review.reviewer.display_name || review.reviewer.email}
                     </p>
                   )}
@@ -243,7 +225,9 @@ export default function MentorPage({ params }: PageProps) {
               ))}
             </div>
           ) : (
-            <p className="text-zinc-500 dark:text-zinc-400 py-4">No reviews yet</p>
+            <div className="text-center py-8 bg-white border-2 border-cream-dark rounded-lg">
+              <p className="text-ink-muted">No reviews yet</p>
+            </div>
           )}
         </section>
       </div>
