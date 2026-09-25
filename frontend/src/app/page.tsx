@@ -12,35 +12,65 @@ function HeroIllustration() {
       className="w-full max-w-xl mx-auto"
       aria-hidden="true"
     >
-      {/* Background frame */}
-      <rect x="40" y="30" width="400" height="220" rx="8" fill="white" stroke="var(--cream-dark)" strokeWidth="3" />
+      <style>{`
+        @media (prefers-reduced-motion: no-preference) {
+          .hero-frame { animation: fade-in 0.4s ease-out both; }
+          .hero-learner { animation: fade-in 0.5s ease-out 0.2s both; }
+          .hero-mentor { animation: fade-in 0.5s ease-out 0.3s both; }
+          .hero-skill { animation: fade-in 0.5s ease-out 0.4s both; }
+          .hero-line-1 {
+            stroke-dasharray: 280;
+            stroke-dashoffset: 280;
+            animation: draw-path 0.8s ease-out 0.5s forwards;
+          }
+          .hero-line-2 {
+            stroke-dasharray: 280;
+            stroke-dashoffset: 280;
+            animation: draw-path 0.8s ease-out 0.7s forwards;
+          }
+          .hero-accent { animation: fade-in 0.3s ease-out 1s both; }
+          @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+          @keyframes draw-path {
+            to { stroke-dashoffset: 0; }
+          }
+        }
+      `}</style>
 
-      {/* Connection arc - bold */}
+      {/* Background frame */}
+      <rect className="hero-frame" x="40" y="30" width="400" height="220" rx="8" fill="white" stroke="var(--cream-dark)" strokeWidth="3" />
+
+      {/* Connection arcs - animated */}
       <path
+        className="hero-line-1"
         d="M140 140 Q240 60 340 140"
         stroke="var(--golden)"
         strokeWidth="4"
         fill="none"
       />
       <path
+        className="hero-line-2"
         d="M140 140 Q240 220 340 140"
         stroke="var(--teal)"
         strokeWidth="4"
         fill="none"
-        strokeDasharray="8 6"
       />
 
       {/* Left figure - the learner */}
-      <circle cx="140" cy="140" r="44" fill="var(--terracotta-light)" stroke="var(--terracotta)" strokeWidth="3" />
-      <circle cx="140" cy="125" r="14" fill="var(--terracotta)" />
-      <path d="M126 145 Q140 165 154 145" stroke="var(--terracotta)" strokeWidth="4" fill="none" strokeLinecap="round" />
-      <rect x="110" y="195" width="60" height="24" rx="4" fill="var(--terracotta)" />
-      <text x="140" y="212" textAnchor="middle" fill="white" style={{ fontSize: "12px", fontWeight: 700, fontFamily: "var(--font-body)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-        You
-      </text>
+      <g className="hero-learner">
+        <circle cx="140" cy="140" r="44" fill="var(--terracotta-light)" stroke="var(--terracotta)" strokeWidth="3" />
+        <circle cx="140" cy="125" r="14" fill="var(--terracotta)" />
+        <path d="M126 145 Q140 165 154 145" stroke="var(--terracotta)" strokeWidth="4" fill="none" strokeLinecap="round" />
+        <rect x="110" y="195" width="60" height="24" rx="4" fill="var(--terracotta)" />
+        <text x="140" y="212" textAnchor="middle" fill="white" style={{ fontSize: "12px", fontWeight: 700, fontFamily: "var(--font-body)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          You
+        </text>
+      </g>
 
       {/* Center - the skill badge */}
-      <g transform="translate(240, 140)">
+      <g className="hero-skill" transform="translate(240, 140)">
         <polygon points="0,-38 33,-19 33,19 0,38 -33,19 -33,-19" fill="var(--golden)" stroke="var(--golden-dark)" strokeWidth="3" />
         <text y="6" textAnchor="middle" fill="white" style={{ fontSize: "14px", fontWeight: 700, fontFamily: "var(--font-display)" }}>
           SKILL
@@ -48,24 +78,25 @@ function HeroIllustration() {
       </g>
 
       {/* Right figure - the mentor */}
-      <circle cx="340" cy="140" r="44" fill="var(--olive-light)" stroke="var(--olive)" strokeWidth="3" />
-      <circle cx="340" cy="125" r="14" fill="var(--olive)" />
-      <path d="M326 145 Q340 165 354 145" stroke="var(--olive)" strokeWidth="4" fill="none" strokeLinecap="round" />
-      {/* Book/teaching symbol */}
-      <rect x="358" y="108" width="22" height="28" rx="2" fill="var(--olive)" stroke="var(--olive-dark)" strokeWidth="2" />
-      <line x1="363" y1="115" x2="375" y2="115" stroke="var(--olive-light)" strokeWidth="2" />
-      <line x1="363" y1="121" x2="372" y2="121" stroke="var(--olive-light)" strokeWidth="2" />
-      <line x1="363" y1="127" x2="375" y2="127" stroke="var(--olive-light)" strokeWidth="2" />
-      <rect x="310" y="195" width="60" height="24" rx="4" fill="var(--olive)" />
-      <text x="340" y="212" textAnchor="middle" fill="white" style={{ fontSize: "12px", fontWeight: 700, fontFamily: "var(--font-body)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-        Mentor
-      </text>
+      <g className="hero-mentor">
+        <circle cx="340" cy="140" r="44" fill="var(--olive-light)" stroke="var(--olive)" strokeWidth="3" />
+        <circle cx="340" cy="125" r="14" fill="var(--olive)" />
+        <path d="M326 145 Q340 165 354 145" stroke="var(--olive)" strokeWidth="4" fill="none" strokeLinecap="round" />
+        <rect x="358" y="108" width="22" height="28" rx="2" fill="var(--olive)" stroke="var(--olive-dark)" strokeWidth="2" />
+        <line x1="363" y1="115" x2="375" y2="115" stroke="var(--olive-light)" strokeWidth="2" />
+        <line x1="363" y1="121" x2="372" y2="121" stroke="var(--olive-light)" strokeWidth="2" />
+        <line x1="363" y1="127" x2="375" y2="127" stroke="var(--olive-light)" strokeWidth="2" />
+        <rect x="310" y="195" width="60" height="24" rx="4" fill="var(--olive)" />
+        <text x="340" y="212" textAnchor="middle" fill="white" style={{ fontSize: "12px", fontWeight: 700, fontFamily: "var(--font-body)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          Mentor
+        </text>
+      </g>
 
       {/* Corner accents */}
-      <circle cx="60" cy="50" r="8" fill="var(--terracotta)" />
-      <circle cx="420" cy="50" r="8" fill="var(--olive)" />
-      <rect x="52" y="230" width="16" height="16" fill="var(--teal)" />
-      <polygon points="420,230 428,246 412,246" fill="var(--golden)" />
+      <circle className="hero-accent" cx="60" cy="50" r="8" fill="var(--terracotta)" />
+      <circle className="hero-accent" cx="420" cy="50" r="8" fill="var(--olive)" />
+      <rect className="hero-accent" x="52" y="230" width="16" height="16" fill="var(--teal)" />
+      <polygon className="hero-accent" points="420,230 428,246 412,246" fill="var(--golden)" />
     </svg>
   );
 }
@@ -147,11 +178,12 @@ export default function Home() {
                   "bg-olive-light border-olive text-olive-dark hover:bg-olive hover:text-white",
                 ];
                 const colorClass = colors[index % colors.length];
+                const staggerClass = `stagger-${Math.min(index + 1, 6)}`;
                 return (
                   <Link
                     key={topic.id}
                     href={`/topics/${topic.id}`}
-                    className={`group block p-6 rounded-lg border-[3px] ${colorClass} transition-all duration-150 hover:translate-y-[-3px] hover:shadow-lg`}
+                    className={`group block p-6 rounded-lg border-[3px] ${colorClass} animate-fade-up ${staggerClass} transition-all duration-150 hover:translate-y-[-3px] hover:shadow-lg`}
                   >
                     <h3 className="font-display font-bold text-lg mb-2">
                       {topic.name}
